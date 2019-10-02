@@ -2,6 +2,7 @@ window.onload = function () {
   const f = new Canvastimeline(document.getElementById("timeline"));
 
   f.initCalendar({
+    start: new Date(2019, 9, 2),
     resources: [{
       id: 1,
       name: "c22a",
@@ -330,7 +331,6 @@ window.onload = function () {
     }
   ];
 
-//setMonth(new Date());
   f.loadEvents(events);
   f.setSizesAndPositionsBeforeRedraw();
   f.drawDayLines();

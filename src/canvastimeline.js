@@ -545,11 +545,14 @@ class Canvastimeline {
     }
     if (obj.hasOwnProperty("sidecols")) {
       this.sidecols = obj.sidecols;
-
     }
 
     this.prepareResources(obj.resources);
-    this.setMonth(new Date());
+    if(obj.hasOwnProperty("start")) {
+      this.setMonth(obj.start);
+    } else {
+      this.setMonth(new Date());
+    }
     this.setSizesAndPositionsBeforeRedraw();
     this.drawDayLines();
     this.drawResources();
