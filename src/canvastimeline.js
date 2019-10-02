@@ -141,7 +141,7 @@ class Canvastimeline {
     this._headerlayer_ctx = this._headerlayer.getContext("2d");
     this._resheaderlayer_ctx = this._resheaderlayer.getContext("2d");
     this._scheduler_wrapper.appendChild(this._resheaderlayer);
-    this._scheduler.appendChild(this._loader);
+    this._scheduler_wrapper.appendChild(this._loader);
     this._scheduler.appendChild(this._headerlayer);
     this._scheduler.appendChild(this._reslayer);
     this._scheduler.appendChild(this._background);
@@ -214,9 +214,6 @@ class Canvastimeline {
       value.height = this._cell_height;
       curY += this._cell_height;
       value.events = [];
-      // to do - try if this is necessary at all
-      // this._resources.set(key, value);
-      console.log(value);
     });
     this._bgHeight = this._resources.size * this._cell_height;
   }
