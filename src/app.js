@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
   const f = new Canvastimeline(document.getElementById("timeline"));
 
   f.initCalendar({
