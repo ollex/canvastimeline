@@ -58,6 +58,34 @@ class Canvastimeline {
 			border-bottom: 1px solid #eee;
 			border-right: 3px solid #eee;
 		}`);
+      style.insertRule(`.canvastimeline-loader {
+        position: absolute;
+        display: none;
+        left: 50%;
+        top: 50%;
+        z-index: 1;
+        width: 150px;
+        height: 150px;
+        margin: -75px 0 0 -75px;
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #1CA1C1;
+        width: 120px;
+        height: 120px;
+        -webkit-animation: spin 1s linear infinite;
+        animation: spin 1s linear infinite;
+      }`);
+
+      style.insertRule(`@-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+      }`);
+
+      style.insertRule(`@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }`);
+
     }
 
     this._cell_height = 30;
@@ -79,11 +107,13 @@ class Canvastimeline {
     this._scheduler_wrapper = document.createElement("div");
     this._scheduler_wrapper.height = this._view.height;
     this._scheduler_wrapper.width = this._view.width;
-    this._scheduler_wrapper.className = 'canvastl_scheduler_wrapper';
+    this._scheduler_wrapper.className = "canvastl_scheduler_wrapper";
+    this._loader = document.createElement("div");
+    this._loader.className = "canvastimeline-loader";
     this._scheduler = document.createElement("div");
     this._scheduler.className = 'canvastl_scheduler';
     this._scheduler.height = this._view.height;
-    this._scheduler.width = this._view.height;
+    this._scheduler.width = this._view.width;
     this._scheduler.style.height = this._view.style.height;
     this._background = document.createElement("canvas");
     this._background.className = "canvastl_level_0";
@@ -111,6 +141,7 @@ class Canvastimeline {
     this._headerlayer_ctx = this._headerlayer.getContext("2d");
     this._resheaderlayer_ctx = this._resheaderlayer.getContext("2d");
     this._scheduler_wrapper.appendChild(this._resheaderlayer);
+    this._scheduler.appendChild(this._loader);
     this._scheduler.appendChild(this._headerlayer);
     this._scheduler.appendChild(this._reslayer);
     this._scheduler.appendChild(this._background);
@@ -145,7 +176,6 @@ class Canvastimeline {
   prepareResources(resources) {
     this._resources_idx.clear();
     this._resources.clear();
-
     this._sidecols.clear();
     this._res_col_width = 0;
     this._helpArray = [];
@@ -175,6 +205,52 @@ class Canvastimeline {
       this._resources.set(r.id, r);
       this._resources_idx.set(idx, r.id);
     });
+  }
+
+  removeEventsAndResetResourceGeometry() {
+    let curY = 0;
+    this._resources.forEach((value, key, map) => {
+      value.yPos = curY;
+      value.height = this._cell_height;
+      curY += this._cell_height;
+      value.events = [];
+      // to do - try if this is necessary at all
+      // this._resources.set(key, value);
+      console.log(value);
+    });
+    this._bgHeight = this._resources.size * this._cell_height;
+  }
+
+  showLoader() {
+    this._loader.style.display = "block";
+  }
+
+  hideLoader() {
+    this._loader.style.display = "none";
+  }
+
+  prepareMonth() {
+    this._days_in_month = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
+    this._numTicksInMonth = 86400 * this._days_in_month * 1000;
+    this._cols_in_tbl = this._days_in_month * this._cell_width;
+    this.removeEventsAndResetResourceGeometry();
+    this.setSizesAndPositionsBeforeRedraw();
+    this.drawDayLines();
+    this.drawResources();
+  }
+
+  prevMonth() {
+    this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() - 1);
+    this._CurMonth = this._curFirstOfMonth.getMonth();
+    this._CurYear = this._curFirstOfMonth.getFullYear();
+    this.prepareMonth()
+  }
+
+  nextMonth() {
+    this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() + 1);
+    this._CurMonth = this._curFirstOfMonth.getMonth();
+    this._CurYear = this._curFirstOfMonth.getFullYear();
+    this.prepareMonth();
   }
 
   setMonth(d) {
@@ -221,10 +297,6 @@ class Canvastimeline {
     return new Date(datePart[0], datePart[1] - 1, datePart[2], timePart[0], timePart[1], timePart[2]);
   }
 
-  /*
-   * this is called with an Array of Event Objects
-   * with id, name and integer resource_id each
-  */
   loadEvents(arrayOfEventObjects) {
     //_resources_idx
     let failureArray = [];
@@ -277,7 +349,7 @@ class Canvastimeline {
               //}
             }
             return false;
-          }
+          };
           ar.forEach((e, idx) => {
             let curLevel = 0;
             while (isConflict(e.minx, e.minx + e.width, value.yPos + curLevel * this._cell_height + 1, e.id)) {
@@ -303,6 +375,15 @@ class Canvastimeline {
     });
     this._bgHeight = prevY;
   }
+
+  loadAndDrawEvents(events) {
+    this.loadEvents(events);
+    this.setSizesAndPositionsBeforeRedraw();
+    this.drawDayLines();
+    this.drawResources();
+    this.drawEvents();
+  }
+
 
   findEventByXY(x, y, startIdx) {
     console.log(x, y, startIdx);
@@ -473,7 +554,6 @@ class Canvastimeline {
     this.setSizesAndPositionsBeforeRedraw();
     this.drawDayLines();
     this.drawResources();
-    console.log(this);
   }
 
 }

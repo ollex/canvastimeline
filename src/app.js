@@ -336,7 +336,27 @@ window.onload = function () {
   f.drawDayLines();
   f.drawResources();
   f.drawEvents();
-
+  setTimeout(function(){
+    f.showLoader();
+    f.prevMonth();
+    setTimeout(function(){
+      f.loadAndDrawEvents([
+        {
+          name: "Olaf",
+          resource_id: 9,
+          start: "2019-09-14 11:45:00",
+          end: "2019-09-21 11:00:00"
+        },
+        {
+          name: "Olaf",
+          resource_id: 9,
+          start: "2019-09-11 11:45:00",
+          end: "2019-09-21 11:00:00"
+        }
+      ]);
+      f.hideLoader();
+      }, 1200);
+    }, 3000);
 
 };
 
