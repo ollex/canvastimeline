@@ -226,10 +226,14 @@ class Canvastimeline {
     this._loader.style.display = "none";
   }
 
-  prepareMonth() {
+  calcTicksAndWidth () {
     this._days_in_month = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
     this._numTicksInMonth = 86400 * this._days_in_month * 1000;
     this._cols_in_tbl = this._days_in_month * this._cell_width;
+  }
+
+  prepareMonth() {
+    this.calcTicksAndWidth();
     this.removeEventsAndResetResourceGeometry();
     this.setSizesAndPositionsBeforeRedraw();
     this.drawDayLines();
@@ -270,9 +274,7 @@ class Canvastimeline {
       OverflowCheckedYear = this._CurYear;
       OverflowCheckedMonth = this._CurMonth + 1;
     }
-    this._days_in_month = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
-    this._numTicksInMonth = 86400 * this._days_in_month * 1000;
-    this._cols_in_tbl = this._days_in_month * this._cell_width;
+    this.calcTicksAndWidth();
   }
 
   getXPos(St) {
