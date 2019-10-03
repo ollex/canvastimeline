@@ -100,10 +100,10 @@ class Canvastimeline {
     this._dayWidths = [];
     this._numNums = [];
     this._numWidths = [];
-    this._CurFirstOfMonth;
-    this._CurMonth;
-    this._CurYear;
-    this._res_col_width;
+    this._curFirstOfMonth = null;
+    this._CurMonth = 0;
+    this._CurYear = 0;
+    this._res_col_width = 0;
     this._bgHeight = 0;
     this._event_overlap = true;
     this._scheduler_wrapper = document.createElement("div");
