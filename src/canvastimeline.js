@@ -215,6 +215,7 @@ class Canvastimeline {
 
   removeEventsAndResetResourceGeometry() {
     let curY = 0;
+    this._max_cell_height = this._cell_height;
     this._resources.forEach((value, key, map) => {
       value.yPos = curY;
       value.height = this._cell_height;
