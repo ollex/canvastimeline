@@ -405,7 +405,7 @@ class Canvastimeline {
           let l = ref.events.length, ev;
           for (let i = 0; i < l; i++) {
             ev = ref.events[i];
-            if ((ev.miny <= y && ev.miny + this._cell_height - 1 >= y) && (ev.minx <= x && ev.minx + ev.width >= x)) {
+            if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
               alert(JSON.stringify(ev, null, 4));
               return ev;
             }
