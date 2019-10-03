@@ -402,6 +402,8 @@ class Canvastimeline {
         }
         if (ref.yPos <= y && ref.yPos + ref.height > y) {
           // the chosen one
+          // maybe switch to some kind of binary search in the future from here
+          // for example start from middle and if start > searched x value then go left else right etc
           let l = ref.events.length, ev;
           for (let i = 0; i < l; i++) {
             ev = ref.events[i];
