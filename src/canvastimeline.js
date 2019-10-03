@@ -66,14 +66,12 @@ class Canvastimeline {
         left: 50%;
         top: 50%;
         z-index: 1;
-        width: 150px;
-        height: 150px;
-        margin: -75px 0 0 -75px;
-        border: 16px solid #f3f3f3;
-        border-radius: 50%;
-        border-top: 16px solid #1CA1C1;
         width: 120px;
         height: 120px;
+        margin: -60px 0 0 -60px;
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 15px solid #1CA1C1;
         -webkit-animation: spin 1s linear infinite;
         animation: spin 1s linear infinite;
       }`);
@@ -409,7 +407,7 @@ class Canvastimeline {
             ev = ref.events[i];
             if ((ev.miny <= y && ev.miny + this._cell_height - 1 >= y) && (ev.minx <= x && ev.minx + ev.width >= x)) {
               alert(JSON.stringify(ev, null, 4));
-              //return ev;
+              return ev;
             }
           }
         }
