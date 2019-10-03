@@ -13,6 +13,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 #What it does
 + show a flexible amount of "resources" in the left column, which is sticky.
 + within the resources you can have a flexible amount of headers which have a name and a width
++ the resource header names should match the object attributes in the resources you load (see code just via an array of objects) thus each row is filled with the approprate data
 + the calendar of course adapts the number of days, daynames etc. when switching between months
 + it recalculates "everything" to match a chosen cell height and cell width.
 + the header row with the dates is also sticky
