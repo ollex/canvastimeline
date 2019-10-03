@@ -43,6 +43,7 @@ class Canvastimeline {
 			position: sticky;
 			top: 0;
 			background: rgb(255, 255, 255);
+			border-bottom: 1px solid #eee;
 			opacity: 1;
 			z-index: 5;
 			margin: 0;
