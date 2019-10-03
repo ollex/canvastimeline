@@ -43,7 +43,8 @@ class Canvastimeline {
 			position: sticky;
 			top: 0;
 			background: rgb(255, 255, 255);
-			border-bottom: 1px solid #eee;
+			box-shadow: 0px 1px 0px #eee;
+			border-bottom: none;
 			opacity: 1;
 			z-index: 5;
 			margin: 0;
@@ -157,6 +158,7 @@ class Canvastimeline {
     this._resources_idx = new Map();
     this._sidecols = new Map();
     this._helpArray = [];
+    this._max_cell_height = this._cell_height;
 
     this._background_ctx.font = "12px Arial";
     for (let i = 1; i < 32; i++) {
@@ -167,14 +169,17 @@ class Canvastimeline {
     });
 
     this._eventlayer.onclick = (ev) => {
-      // we don't need to search before this in the resources
-      let yStart = ev.layerY / this._cell_height;
+      // we don't need to search everywhere in the resources
+      let minIdx = ev.layerY / this._max_cell_height;
+      let maxIdx = ev.layerY / this._cell_height;
 
-      this.findEventByXY(ev.layerX, ev.layerY, yStart);
+      this.findEventByXY(ev.layerX, ev.layerY, minIdx, maxIdx);
     };
   }
 
   prepareResources(resources) {
+    // the resoucres_idx is useful for indexing if we do not allow event overlap
+    // if we do allow it we need to calculate min and max to save on cycles until we find rescource
     this._resources_idx.clear();
     this._resources.clear();
     this._sidecols.clear();
@@ -267,14 +272,6 @@ class Canvastimeline {
     this._CurMonth = d.getMonth();
     this._CurYear = d.getFullYear();
 
-    let OverflowCheckedMonth, OverflowCheckedYear;
-    if (this._CurMonth === 11) {
-      OverflowCheckedYear = this._CurYear + 1;
-      OverflowCheckedMonth = 0;
-    } else {
-      OverflowCheckedYear = this._CurYear;
-      OverflowCheckedMonth = this._CurMonth + 1;
-    }
     this.calcTicksAndWidth();
   }
 
@@ -286,6 +283,7 @@ class Canvastimeline {
     return this._cols_in_tbl * ((E - S) / this._numTicksInMonth);
   }
 
+  // is useful without event overlap only, really
   getYPos(resource_id) {
     return (this._resources.get(resource_id).idx * this._cell_height) + 1;
   }
@@ -299,7 +297,7 @@ class Canvastimeline {
 
   loadEvents(arrayOfEventObjects) {
     //_resources_idx
-    let failureArray = [];
+    let failureArray = [], maximum_resource_height = this._cell_height ;
     try {
       arrayOfEventObjects.forEach((ev) => {
         let startDate = this.parseDate(ev.start);
@@ -307,6 +305,7 @@ class Canvastimeline {
         ev.minx = this.getXPos(startDate.getTime());
         ev.width = this.getWidth(startDate.getTime(), endDate.getTime());
         try {
+          // maybe we can save on this getYPos call in case we use event_overlap = true
           ev.miny = this.getYPos(ev.resource_id);
           this._resources.get(ev.resource_id).events.push(ev);
         } catch (err) {
@@ -363,7 +362,9 @@ class Canvastimeline {
           });
 
         });
-
+        if(this._max_cell_height < maxHeightFactor * this._cell_height) {
+          this._max_cell_height = maxHeightFactor * this._cell_height;
+        }
         value.height = maxHeightFactor > 0 ? maxHeightFactor * this._cell_height : this._cell_height;
         prevY += value.height;
       } else {
@@ -384,17 +385,14 @@ class Canvastimeline {
     this.drawEvents();
   }
 
-
-  findEventByXY(x, y, startIdx) {
-    console.log(x, y, startIdx);
+  findEventByXY(x, y, startIdx, endIdx) {
+    console.log(startIdx, endIdx);
     startIdx = parseInt(startIdx) - 1;
-    //roadmap: load events into buckets divided by cell_height
-    //so click offsetY / cell_height = bucket makes search much quicker
-    //and indexing some easier
-    const max = this._resources.size;
+    endIdx = parseInt(endIdx);
+    if(startIdx < 0) startIdx = 0;
     let ref;
     endsearch:
-      for (let i = 0; i < max; i++) {
+      for (let i = startIdx; i <= endIdx; i++) {
         let id = this._resources_idx.get(i);
         if (!id) {
           continue;
@@ -409,7 +407,8 @@ class Canvastimeline {
           for (let i = 0; i < l; i++) {
             ev = ref.events[i];
             if ((ev.miny <= y && ev.miny + this._cell_height - 1 >= y) && (ev.minx <= x && ev.minx + ev.width >= x)) {
-              return ev;
+              alert(JSON.stringify(ev, null, 4));
+              //return ev;
             }
           }
         }
