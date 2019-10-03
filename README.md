@@ -6,7 +6,7 @@ In canvas' immediate mode almost everything needs to be scheduled in the right o
 It has advantages though, too and even in DOM based scheduler libraries part of the layout is usually absolutely positioned and pre/-recalculated to make perfect sense.  
 Thus, the effort to build a fully fledged "thing" with canvas in the end might not be much different, but maybe will keep restricted to a certain amount of features. 
 
-As I am not working a lot of time on this the plans I have for the moment are to add some more date "leap" methods (years not only months) and later on the option to view not only months, but also week(s) and maybe I will test year as view as well and see how that performs.  
+As I am not working a lot of time on this the plans I have for the moment are to add some more date "leap" methods (years not only months) and later on the option to view not only months, but also week(s) and maybe I will test year as view as well and see how that performs. Also soon to be added is "add event" and "remove event" when events are already loaded. 
 
 One thing I will probably not add directly to the calendar class is buttons and controls, this should keep completely flexible and the class will provide the functions you can call whenever someone uses your user interface surrounding instances of this canvastimeline.
 
