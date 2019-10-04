@@ -3,6 +3,9 @@ window.onload = function () {
 
   f.initCalendar({
     start: new Date(2019, 9, 2),
+    onEventFound: function(ev) {
+      alert(JSON.stringify(ev, null, 4));
+    },
     resources: [{
       id: 1,
       name: "c22a",

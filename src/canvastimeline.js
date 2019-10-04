@@ -157,6 +157,7 @@ class Canvastimeline {
     this._sidecols = new Map();
     this._helpArray = [];
     this._max_cell_height = this._cell_height;
+    this._onEventFound = null;
 
     this._background_ctx.font = "12px Arial";
     for (let i = 1; i < 32; i++) {
@@ -298,7 +299,7 @@ class Canvastimeline {
     //_resources_idx
     let failureArray = [], maximum_resource_height = this._cell_height ;
     try {
-      arrayOfEventObjects.forEach((ev) => {
+      for(let ev of arrayOfEventObjects) {
         let startDate = this.parseDate(ev.start);
         let endDate = this.parseDate(ev.end);
         ev.minx = this.getXPos(startDate.getTime());
@@ -311,7 +312,7 @@ class Canvastimeline {
           // this one most probably has a resource_id that has not been initialized with the _resources
           failureArray.push(ev);
         }
-      });
+      }
     } catch (err) {
       console.log(err);
       alert("Event Object Array does not match signature!");
@@ -348,7 +349,7 @@ class Canvastimeline {
             }
             return false;
           };
-          ar.forEach((e, idx) => {
+          for(let e of ar) {
             let curLevel = 0;
             while (isConflict(e.minx, e.minx + e.width, value.yPos + curLevel * this._cell_height + 1, e.id)) {
               curLevel++;
@@ -358,7 +359,7 @@ class Canvastimeline {
             if (curLevel > maxHeightFactor) {
               maxHeightFactor = curLevel + 1;
             }
-          });
+          };
 
         });
         if(this._max_cell_height < maxHeightFactor * this._cell_height) {
@@ -400,16 +401,30 @@ class Canvastimeline {
         if (!ref) {
           continue;
         }
-        if (ref.yPos <= y && ref.yPos + ref.height > y) {
-          // the chosen one
-          // maybe switch to some kind of binary search in the future from here
-          // for example start from middle and if start > searched x value then go left else right etc
+        if (ref.yPos <= y && ref.yPos + ref.height >= y) {
+          // ideas for quicker search here
+          // maybe switch to some kind of binary search
+          // for second search maybe need max width per events that are in a resource
+          /*
+               let start=0, end=arr.length-1;
+                  while (start<=end){
+                      let mid=Math.floor((start + end)/2);
+                      if (arr[mid]=== criteria) return true;
+                      else if (arr[mid] < xclick)
+                           start = mid + 1;
+                      else
+                     => here we need more tests could be same start date...
+                           end = mid - 1;
+                  }
+                  not found here
+          */
           let l = ref.events.length, ev;
           for (let i = 0; i < l; i++) {
             ev = ref.events[i];
             if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
-              alert(JSON.stringify(ev, null, 4));
-              return ev;
+              if(this._onEventFound) {
+                this._onEventFound(ev);
+              }
             }
           }
         }
@@ -546,6 +561,11 @@ class Canvastimeline {
     }
     if (obj.hasOwnProperty("sidecols")) {
       this.sidecols = obj.sidecols;
+    }
+    if(obj.hasOwnProperty("onEventFound")) {
+      if(typeof obj.onEventFound === "function") {
+        this._onEventFound = obj.onEventFound;
+      }
     }
 
     this.prepareResources(obj.resources);
