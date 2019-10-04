@@ -402,22 +402,22 @@ class Canvastimeline {
           continue;
         }
         if (ref.yPos <= y && ref.yPos + ref.height >= y) {
-          // ideas for quicker search here
-          // maybe switch to some kind of binary search
-          // for second search maybe need max width per events that are in a resource
-          /*
-               let start=0, end=arr.length-1;
+               let start=0, end= ref.events.length-1;
                   while (start<=end){
                       let mid=Math.floor((start + end)/2);
-                      if (arr[mid]=== criteria) return true;
-                      else if (arr[mid] < xclick)
-                           start = mid + 1;
-                      else
-                     => here we need more tests could be same start date...
-                           end = mid - 1;
+                      if ((ref.events[mid].minx <= x && ref.events[mid].minx + ref.events[mid].width >= x) && (ref.events[mid].miny <= y && ref.events[mid].miny + this._cell_height - 1 >= y)) {
+                        return this._onEventFound(ref.events[mid]);
+                      } else if (ref.events[mid].minx <= x && ref.events[mid].minx + ref.events[mid].width >= x) {
+                        start = mid + 1;
+                      } else if (ref.events[mid].minx < x) {
+                        start = mid + 1;
+                      } else {
+                        end = mid - 1;
+                      }
                   }
-                  not found here
-          */
+                  return undefined;
+                  //not found here
+          /*
           let l = ref.events.length, ev;
           for (let i = 0; i < l; i++) {
             ev = ref.events[i];
@@ -426,7 +426,7 @@ class Canvastimeline {
                 this._onEventFound(ev);
               }
             }
-          }
+          }*/
         }
       }
     return undefined;
