@@ -21,5 +21,5 @@ One thing I will probably not add directly to the calendar class is buttons and 
 + the events have the appropriate relative width and position according to their start and end date
 + the events will be packed to some extend but never overlap, so the cell heights keep at a minimum but events are always visible
 + changing a month empties the events which are at the moment internally attached to resources
-+ a click handler is attached to the event layer canvas and finds the event clicked (or no event when the click was not where an event is)
++ a configurable click handler (deliver your callback with initial config object) is attached to the event layer canvas and finds the event clicked (or no event when the click was not where an event is)
 ![alt text](./src/images/screenshot.png)
