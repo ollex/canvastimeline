@@ -170,9 +170,7 @@ class Canvastimeline {
     this._eventlayer.onclick = (ev) => {
       // we don't need to search everywhere in the resources
       let minIdx = ev.layerY / this._max_cell_height;
-      let maxIdx = (ev.layerY / this._cell_height);
-      if(maxIdx > this._resources.size) maxIdx = this._resources.size;
-      this.findEventByXY(ev.layerX, ev.layerY, minIdx, maxIdx);
+      this.findEventByXY(ev.layerX, ev.layerY, minIdx, this._resources.size - 1);
     };
   }
 
