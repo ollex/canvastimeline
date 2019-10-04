@@ -386,52 +386,33 @@ class Canvastimeline {
   }
 
   findEventByXY(x, y, startIdx, endIdx) {
-    console.log(startIdx, endIdx);
     startIdx = parseInt(startIdx) - 1;
     endIdx = parseInt(endIdx);
     if(startIdx < 0) startIdx = 0;
     let ref;
-    endsearch:
-      for (let i = startIdx; i <= endIdx; i++) {
-        let id = this._resources_idx.get(i);
-        if (!id) {
-          continue;
-        }
-        ref = this._resources.get(id);
-        if (!ref) {
-          continue;
-        }
-        if (ref.yPos <= y && ref.yPos + ref.height >= y) {
-          // to do console.log events to see if they're sorted ok
-            /*   let start=0, end= ref.events.length-1;
-                  while (start<=end){
-                      let mid=Math.floor((start + end)/2);
-                      if ((ref.events[mid].minx <= x && ref.events[mid].minx + ref.events[mid].width >= x) && (ref.events[mid].miny <= y && ref.events[mid].miny + this._cell_height - 1 >= y)) {
-                        return this._onEventFound(ref.events[mid]);
-                      } else if (ref.events[mid].minx <= x && ref.events[mid].minx + ref.events[mid].width >= x && ref.events[mid].miny > y) {
-                        start = mid + 1;
-                      } else if (ref.events[mid].minx <= x && ref.events[mid].minx + ref.events[mid].width >= x && ref.events[mid].miny < y) {
-                        end = mid - 1;
-                      } else if (ref.events[mid].minx < x) {
-                        start = mid + 1;
-                      } else {
-                        end = mid - 1;
-                      }
-                  }
-                  return undefined;
-                  //not found here
-          */
-          let l = ref.events.length, ev;
-          for (let i = 0; i < l; i++) {
-            ev = ref.events[i];
-            if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
-              if(this._onEventFound) {
-                this._onEventFound(ev);
-              }
+    // binary search for resources doesnt work properly for events yet because they're not ordered properly
+    let start =startIdx, end = endIdx;
+    while (start<=end){
+      let mid=Math.floor((start + end)/2);
+      let id = this._resources_idx.get(mid);
+      ref = this._resources.get(id);
+      if (ref.yPos <= y && ref.yPos + ref.height >= y) {
+        // this is the right bucket
+        let l = ref.events.length, ev;
+        for (let i = 0; i < l; i++) {
+          ev = ref.events[i];
+          if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
+            if(this._onEventFound) {
+              return this._onEventFound(ev);
             }
           }
         }
+      } else if (ref.yPos < y) {
+        start = mid + 1;
+      } else {
+        end = mid - 1;
       }
+    }
     return undefined;
   }
 
