@@ -391,7 +391,7 @@ class Canvastimeline {
     if(startIdx < 0) startIdx = 0;
     let ref;
     // binary search for resources doesnt work properly for events yet because they're not ordered properly
-    let start =startIdx, end = endIdx;
+    let start =startIdx, end = endIdx, ended = false;
     while (start<=end){
       let mid=Math.floor((start + end)/2);
       let id = this._resources_idx.get(mid);
@@ -404,16 +404,18 @@ class Canvastimeline {
           if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
             if(this._onEventFound) {
               return this._onEventFound(ev);
+            } else {
+              return;
             }
           }
         }
+        return;
       } else if (ref.yPos < y) {
         start = mid + 1;
       } else {
         end = mid - 1;
       }
     }
-    return undefined;
   }
 
   drawEvents() {
