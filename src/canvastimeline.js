@@ -170,8 +170,8 @@ class Canvastimeline {
     this._eventlayer.onclick = (ev) => {
       // we don't need to search everywhere in the resources
       let minIdx = ev.layerY / this._max_cell_height;
-      let maxIdx = ev.layerY / this._cell_height;
-
+      let maxIdx = (ev.layerY / this._cell_height);
+      if(maxIdx > this._resources.size) maxIdx = this._resources.size;
       this.findEventByXY(ev.layerX, ev.layerY, minIdx, maxIdx);
     };
   }
@@ -232,7 +232,7 @@ class Canvastimeline {
     this._loader.style.display = "none";
   }
 
-  calcTicksAndWidth () {
+  calcTicksAndWidth() {
     this._days_in_month = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
     this._numTicksInMonth = 86400 * this._days_in_month * 1000;
     this._cols_in_tbl = this._days_in_month * this._cell_width;
@@ -297,9 +297,9 @@ class Canvastimeline {
 
   loadEvents(arrayOfEventObjects) {
     //_resources_idx
-    let failureArray = [], maximum_resource_height = this._cell_height ;
+    let failureArray = [], maximum_resource_height = this._cell_height;
     try {
-      for(let ev of arrayOfEventObjects) {
+      for (let ev of arrayOfEventObjects) {
         let startDate = this.parseDate(ev.start);
         let endDate = this.parseDate(ev.end);
         ev.minx = this.getXPos(startDate.getTime());
@@ -325,6 +325,7 @@ class Canvastimeline {
         let possibleMultiArray = this.separate(value.events);
         value.events = [];
         let maxHeightFactor = 0;
+        let maxWidthOfEvent = 0;
         possibleMultiArray.forEach((ar) => {
           let helper = [];
           ar.sort(function (a, b) {
@@ -349,8 +350,11 @@ class Canvastimeline {
             }
             return false;
           };
-          for(let e of ar) {
+          for (let e of ar) {
             let curLevel = 0;
+            if(maxWidthOfEvent < e.width) {
+              maxWidthOfEvent = e.width;
+            }
             while (isConflict(e.minx, e.minx + e.width, value.yPos + curLevel * this._cell_height + 1, e.id)) {
               curLevel++;
             }
@@ -359,15 +363,16 @@ class Canvastimeline {
             if (curLevel > maxHeightFactor) {
               maxHeightFactor = curLevel + 1;
             }
-          };
-
+          }
         });
-        if(this._max_cell_height < maxHeightFactor * this._cell_height) {
+        value.max_event_width = maxWidthOfEvent;
+        if (this._max_cell_height < maxHeightFactor * this._cell_height) {
           this._max_cell_height = maxHeightFactor * this._cell_height;
         }
         value.height = maxHeightFactor > 0 ? maxHeightFactor * this._cell_height : this._cell_height;
         prevY += value.height;
       } else {
+        value.max_event_width = 0;
         value.height = this._cell_height;
         value.yPos = prevY;
         prevY += this._cell_height;
@@ -388,21 +393,23 @@ class Canvastimeline {
   findEventByXY(x, y, startIdx, endIdx) {
     startIdx = parseInt(startIdx) - 1;
     endIdx = parseInt(endIdx);
-    if(startIdx < 0) startIdx = 0;
+    if (startIdx < 0) startIdx = 0;
     let ref;
     // binary search for resources doesnt work properly for events yet because they're not ordered properly
-    let start =startIdx, end = endIdx, ended = false;
-    while (start<=end){
-      let mid=Math.floor((start + end)/2);
-      let id = this._resources_idx.get(mid);
+    let start = startIdx, end = endIdx, id, mid;
+    console.log("startidx " + startIdx);
+    console.log("endidx " + endIdx);
+    while (start <= end) {
+      mid = Math.floor((start + end) / 2);
+      id = this._resources_idx.get(mid);
       ref = this._resources.get(id);
+      console.log(ref);
+      let l = ref.events.length, ev;
       if (ref.yPos <= y && ref.yPos + ref.height >= y) {
-        // this is the right bucket
-        let l = ref.events.length, ev;
         for (let i = 0; i < l; i++) {
           ev = ref.events[i];
           if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
-            if(this._onEventFound) {
+            if (this._onEventFound) {
               return this._onEventFound(ev);
             } else {
               return;
@@ -548,14 +555,14 @@ class Canvastimeline {
     if (obj.hasOwnProperty("sidecols")) {
       this.sidecols = obj.sidecols;
     }
-    if(obj.hasOwnProperty("onEventFound")) {
-      if(typeof obj.onEventFound === "function") {
+    if (obj.hasOwnProperty("onEventFound")) {
+      if (typeof obj.onEventFound === "function") {
         this._onEventFound = obj.onEventFound;
       }
     }
 
     this.prepareResources(obj.resources);
-    if(obj.hasOwnProperty("start")) {
+    if (obj.hasOwnProperty("start")) {
       this.setMonth(obj.start);
     } else {
       this.setMonth(new Date());

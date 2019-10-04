@@ -339,7 +339,7 @@ window.onload = function () {
   f.drawDayLines();
   f.drawResources();
   f.drawEvents();
-  setTimeout(function(){
+  /*setTimeout(function(){
     f.showLoader();
     f.prevMonth();
     setTimeout(function(){
@@ -360,6 +360,6 @@ window.onload = function () {
       f.hideLoader();
       }, 1200);
     }, 3000);
-
+*/
 };
 
