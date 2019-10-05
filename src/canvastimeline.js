@@ -364,10 +364,11 @@ class Canvastimeline {
             e.miny = value.yPos + curLevel * this._cell_height + 1;
             value.events.push(e);
             if (curLevel > maxHeightFactor) {
-              maxHeightFactor = curLevel + 1;
+              maxHeightFactor = curLevel;
             }
           }
         });
+        maxHeightFactor += 1;
         value.max_event_width = maxWidthOfEvent;
         if (this._max_cell_height < maxHeightFactor * this._cell_height) {
           this._max_cell_height = maxHeightFactor * this._cell_height;
@@ -380,7 +381,8 @@ class Canvastimeline {
         value.yPos = prevY;
         prevY += this._cell_height;
       }
-      this._resources.set(key, value);
+      // not needed was all by reference
+      //this._resources.set(key, value);
     });
     this._bgHeight = prevY;
   }
@@ -391,6 +393,99 @@ class Canvastimeline {
     this.drawDayLines();
     this.drawResources();
     this.drawEvents();
+  }
+
+  addEvent(ev) {
+    const ref = this._resources.get(ev.resource_id);
+    let prevHeight = ref.height;
+    let startDate = this.parseDate(ev.start);
+    let endDate = this.parseDate(ev.end);
+    ev.minx = this.getXPos(startDate.getTime());
+    ev.width = this.getWidth(startDate.getTime(), endDate.getTime());
+    ev.miny = ref.yPos + 1;
+    if (ref.events.length) {
+      ref.events.push(ev);
+      // equalize them here to correct anything that was set to other y Level before
+      ref.events.forEach(function(ev) {
+        ev.miny = ref.yPos + 1;
+      });
+      let possibleMultiArray = this.separate(ref.events);
+      ref.events = [];
+      let maxHeightF = 0;
+      let maxWidthOfEvent = 0;
+      possibleMultiArray.forEach((ar) => {
+        ar.sort(function (a, b) {
+          if (a.start < b.start)
+            return -1;
+          if (a.start > b.start)
+            return 1;
+          return 0;
+        });
+
+        const isConflict = (x, w, lvl, id) => {
+          const l = ref.events.length;
+          let e;
+          for (let i = 0; i < l; i++) {
+            e = ref.events[i];
+            //if(e.id != id) {
+            if (e.miny == lvl && (x <= e.minx + e.width && w >= e.minx)) {
+              return true;
+            }
+            //}
+          }
+          return false;
+        };
+
+        for (let e of ar) {
+          let curLevel = 0;
+          if(maxWidthOfEvent < e.width) {
+            maxWidthOfEvent = e.width;
+          }
+          while (isConflict(e.minx, e.minx + e.width, ref.yPos + curLevel * this._cell_height + 1, e.id)) {
+            curLevel++;
+          }
+          e.miny = ref.yPos + curLevel * this._cell_height + 1;
+          ref.events.push(e);
+          if (curLevel > maxHeightF) {
+            maxHeightF = curLevel;
+          }
+        }
+      });
+      maxHeightF += 1;
+      ref.max_event_width = maxWidthOfEvent;
+      if (this._max_cell_height < maxHeightF * this._cell_height) {
+        this._max_cell_height = maxHeightF * this._cell_height;
+      }
+      ref.height = maxHeightF > 0 ? maxHeightF * this._cell_height : this._cell_height;
+      const diff = ref.height - prevHeight;
+      this._bgHeight += diff;
+      //yPos needs to be applied to all following resources
+      if(diff) {
+        let ref2;
+        for(let i = ref.idx + 1; i < this._resources.size; i++) {
+          ref2 = this._resources.get(this._resources_idx.get(i));
+          ref2.yPos += diff;
+          ref2.events.forEach(function(ev) {
+            ev.miny += diff;
+          });
+        }
+      }
+
+      // redrawing from actual yPos only works if we do not have to change the height of the 3 involved canvases.
+      // so in the future check first if bgHeight has changed at all and then maybe only redraw the changed part
+      // optimally just make a copy of all lower parts and then re-insert that at the new position after drawing
+      // the actually changed row...
+      this.setSizesAndPositionsBeforeRedraw();
+      this.drawDayLines();
+      this.drawResources();
+      this.drawEvents();
+    } else {
+      ref.events.push(ev);
+      ref.max_event_width = ev.width;
+      ev.miny = ref.yPos * this._cell_height + 1;
+      ref.events.push(ev);
+      this.drawEvents();
+    }
   }
 
   findEventByXY(x, y, startIdx, endIdx) {
@@ -539,7 +634,6 @@ class Canvastimeline {
       }
     }
     this._resources.forEach((value, key, map) => {
-      //console.log(value.events);
       this._background_ctx.moveTo(0, value.yPos);
       this._background_ctx.lineTo(this._cols_in_tbl, value.yPos);
     })
@@ -560,6 +654,10 @@ class Canvastimeline {
         this._onEventFound = obj.onEventFound;
       }
     }
+	if(obj.hasOwnProperty("inFrame")) {
+		this._scheduler.style.height = "100vH";
+		document.body.style.margin = "0";
+	}
 
     this.prepareResources(obj.resources);
     if (obj.hasOwnProperty("start")) {

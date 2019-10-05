@@ -2,6 +2,7 @@ window.onload = function () {
   const f = new Canvastimeline(document.getElementById("timeline"));
 
   f.initCalendar({
+	 // inFrame: true,
     start: new Date(2019, 9, 2),
     onEventFound: function(ev) {
       alert(JSON.stringify(ev, null, 4));
@@ -357,6 +358,12 @@ window.onload = function () {
           end: "2019-09-21 11:00:00"
         }
       ]);
+      f.addEvent({
+        name: "Olaf inserted",
+        resource_id: 9,
+        start: "2019-09-11 13:45:00",
+        end: "2019-09-15 11:00:00"
+      });
       f.hideLoader();
       }, 1200);
     }, 3000);
