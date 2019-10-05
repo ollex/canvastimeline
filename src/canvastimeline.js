@@ -456,6 +456,7 @@ class Canvastimeline {
       if (this._max_cell_height < maxHeightF * this._cell_height) {
         this._max_cell_height = maxHeightF * this._cell_height;
       }
+      console.log("max height F: " + maxHeightF);
       ref.height = maxHeightF > 0 ? maxHeightF * this._cell_height : this._cell_height;
       const diff = ref.height - prevHeight;
       this._bgHeight += diff;
@@ -482,7 +483,6 @@ class Canvastimeline {
     } else {
       ref.events.push(ev);
       ref.max_event_width = ev.width;
-      ev.miny = ref.yPos * this._cell_height + 1;
       ref.events.push(ev);
       this.drawEvents();
     }
