@@ -168,9 +168,14 @@ class Canvastimeline {
     });
 
     this._eventlayer.onclick = (ev) => {
-      // we don't need to search everywhere in the resources
-      let minIdx = ev.layerY / this._max_cell_height;
-      this.findEventByXY(ev.layerX, ev.layerY, minIdx, this._resources.size - 1);
+      // make this work "always"
+      const rect = ev.target.getBoundingClientRect();
+      const x = ev.clientX - rect.left; //x position within the element.
+      const y = ev.clientY - rect.top;
+      let minIdx = ev.y / this._max_cell_height;
+      this.findEventByXY(x, y, minIdx, this._resources.size - 1);
+      //let minIdx = ev.layerY / this._max_cell_height;
+      //this.findEventByXY(ev.layerX, ev.layerY, minIdx, this._resources.size - 1);
     };
   }
 
@@ -395,13 +400,10 @@ class Canvastimeline {
     let ref;
     // binary search for resources doesnt work properly for events yet because they're not ordered properly
     let start = startIdx, end = endIdx, id, mid;
-    console.log("startidx " + startIdx);
-    console.log("endidx " + endIdx);
     while (start <= end) {
       mid = Math.floor((start + end) / 2);
       id = this._resources_idx.get(mid);
       ref = this._resources.get(id);
-      console.log(ref);
       let l = ref.events.length, ev;
       if (ref.yPos <= y && ref.yPos + ref.height >= y) {
         for (let i = 0; i < l; i++) {
