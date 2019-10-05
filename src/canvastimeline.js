@@ -492,7 +492,7 @@ class Canvastimeline {
     endIdx = parseInt(endIdx);
     if (startIdx < 0) startIdx = 0;
     let ref;
-    // binary search for resources doesnt work properly for events yet because they're not ordered properly
+    // binary search for events coming but it's more tricky as it's a range
     let start = startIdx, end = endIdx, id, mid;
     while (start <= end) {
       mid = Math.floor((start + end) / 2);
