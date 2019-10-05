@@ -371,6 +371,12 @@ window.onload = function () {
           start: "2019-09-11 13:45:00",
           end: "2019-09-15 11:00:00"
         });
+        f.addEvent({
+          name: "Olaf inserted",
+          resource_id: 8,
+          start: "2019-09-05 13:45:00",
+          end: "2019-09-07 11:00:00"
+        });
       }, 1000);
       f.hideLoader();
       }, 1200);
