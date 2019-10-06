@@ -478,7 +478,6 @@ class Canvastimeline {
     }
     ref.height = maxHeightF > 0 ? maxHeightF * this._cell_height : this._cell_height;
     const diff = ref.height - prevHeight;
-    this._bgHeight += diff;
     //yPos needs to be applied to all following resources
     if (diff) {
       let ref2;
