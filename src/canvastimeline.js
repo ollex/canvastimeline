@@ -482,6 +482,7 @@ class Canvastimeline {
     //yPos needs to be applied to all following resources
     if (diff) {
       let ref2;
+      this._bgHeight += diff;
       for (let i = ref.idx + 1; i < this._resources.size; i++) {
         ref2 = this._resources.get(this._resources_idx.get(i));
         ref2.yPos += diff;
