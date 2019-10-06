@@ -392,6 +392,33 @@ class Canvastimeline {
     this.drawEvents();
   }
 
+  /**
+   * the ev argument needs to contain at least the event's id
+   * and the resource_id field
+   */
+
+  removeEvent(ev) {
+     const { id, resource_id } = ev;
+     if(id && resource_id) {
+       const ref = this._resources.get(resource_id);
+      if(!ref) {
+        throw new Error("Resource not found");
+      }
+       let idx = ref.events.findIndex(function(item) {
+         return item.id == id;
+       });
+       if(idx !== -1) {
+         const removed = ref.events.splice(idx, 1)[0];
+         this._eventlayer_ctx.clearRect(removed.minx, removed.miny, removed.width, this._cell_height -1);
+
+       } else {
+         throw new Error("Event not found");
+       }
+     } else {
+       throw new Error("Missing identifier id and/or resource_id");
+     }
+  }
+
   addEvent(ev) {
     const ref = this._resources.get(ev.resource_id);
     let prevHeight = ref.height;
@@ -503,7 +530,7 @@ class Canvastimeline {
         for (let i = 0; i < l; i++) {
           ev = ref.events[i];
           if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
-            return this._onEventFound(ev);
+            return this._onEventFound(ev, ref.id);
           }
         }
         return;
