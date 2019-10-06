@@ -8,7 +8,6 @@ Thus, the effort to build a fully fledged "thing" with canvas in the end might n
 
 As I am not working a lot of time on this the plans I have for the moment are to add some more date "leap" methods (years not only months) and later on the option to view not only months, but also week(s). 
 I might test a year view as well and see how that performs.   
-Also just added an "add event" method, "remove event" soon to follow. 
 
 One thing I will probably not add directly to the calendar class is buttons and controls, this should keep completely flexible and the class will provide the functions you can call whenever someone uses your user interface surrounding instances of this canvastimeline.
 
