@@ -1,3 +1,4 @@
+"use strict";
 window.onload = function () {
   const f = new Canvastimeline(document.getElementById("timeline"));
 

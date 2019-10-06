@@ -1,3 +1,5 @@
+"use strict";
+
 class Canvastimeline {
   constructor(parentEl) {
     this._view = parentEl;
