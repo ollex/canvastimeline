@@ -166,7 +166,7 @@ class Canvastimeline {
       this._dayWidths[idx] = this._background_ctx.measureText(d).width;
     });
 
-    this._eventlayer.onclick = this.findEventByXY;
+    this._eventlayer.onclick = this.findEventByXY.bind(this);
   }
 
 
