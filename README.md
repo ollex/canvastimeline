@@ -20,6 +20,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 + the header row with the dates is also sticky
 + you can load any amount of events which will be visible when they are matching the currently chosen month
 + you can add and remove single events, the geometry will be adjusted
++ events now have an optional color and background attribute
 + the events have the appropriate relative width and position according to their start and end date
 + the events will be packed to some extend but never overlap, so the cell heights keep at a minimum but events are always visible
 + changing a month empties the events which are at the moment internally attached to resources
