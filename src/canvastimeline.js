@@ -98,7 +98,6 @@ class Canvastimeline {
     this._rows_in_tbl = this._num_resources * this._cell_height;
     this._days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     this._dayWidths = [];
-    this._numNums = [];
     this._numWidths = [];
     this._curFirstOfMonth = null;
     this._CurMonth = 0;
@@ -150,8 +149,6 @@ class Canvastimeline {
     this._scheduler.appendChild(this._eventlayer);
     this._scheduler_wrapper.appendChild(this._scheduler);
     this._view.appendChild(this._scheduler_wrapper);
-    this._prevScrollTop = 0;
-    this._prevScrollLeft = 0;
     this._resources = [];
     this.sidecols = [];
     this._resources = new Map();
@@ -169,16 +166,28 @@ class Canvastimeline {
       this._dayWidths[idx] = this._background_ctx.measureText(d).width;
     });
 
-    this._eventlayer.onclick = (ev) => {
-      // make this work "always"
-      const rect = ev.target.getBoundingClientRect();
-      const x = ev.clientX - rect.left; //x position within the element.
-      const y = ev.clientY - rect.top;
-      let minIdx = ev.y / this._max_cell_height;
-      this.findEventByXY(x, y, minIdx, this._resources.size - 1);
-      //let minIdx = ev.layerY / this._max_cell_height;
-      //this.findEventByXY(ev.layerX, ev.layerY, minIdx, this._resources.size - 1);
-    };
+    this._eventlayer.onclick = this.findEventByXY;
+  }
+
+
+  destroy(removeParent) {
+    this._eventlayer.removeEventListener("click", this.findEventByXY);
+    while (this._view.firstChild) {
+      this._view.removeChild(this._view.firstChild);
+    }
+    let pV = this._view;
+    console.log(pV);
+    Object.keys(this).forEach((k) => {
+      try {
+        delete this[k];
+      } catch(err) {
+        console.log(k);
+      }
+    });
+    if(removeParent) {
+      pV.parentNode.removeChild(pV);
+    }
+    pV = null;
   }
 
   prepareResources(resources) {
@@ -522,11 +531,17 @@ class Canvastimeline {
     }
   }
 
-  findEventByXY(x, y, startIdx, endIdx) {
+  findEventByXY(ev) {
+    const rect = ev.target.getBoundingClientRect();
+    const x = ev.clientX - rect.left; //x position within the element.
+    const y = ev.clientY - rect.top;
+    let startIdx = y / this._max_cell_height - 1;
+    let endIdx = this._resources.size - 1;
+    //this.findEventByXY(x, y, minIdx, this._resources.size - 1);
     // don't bother if no one is interested...
     if (!this._onEventFound) return;
-    startIdx = parseInt(startIdx) - 1;
-    endIdx = parseInt(endIdx);
+    //startIdx = parseInt(startIdx) - 1;
+    //endIdx = parseInt(endIdx);
     if (startIdx < 0) startIdx = 0;
     let ref;
     // binary search for events coming but it's more tricky as it's a range

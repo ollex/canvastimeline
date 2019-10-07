@@ -422,6 +422,7 @@ window.onload = function () {
           background: "black"
         });
         f.removeEvent({id: 111, resource_id: 9});
+        f.destroy(true);
       }, 1000);
       f.hideLoader();
       }, 1200);
