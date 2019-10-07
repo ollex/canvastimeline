@@ -478,7 +478,6 @@ class Canvastimeline {
     }
     ref.height = maxHeightF > 0 ? maxHeightF * this._cell_height : this._cell_height;
     const diff = ref.height - prevHeight;
-    //yPos needs to be applied to all following resources
     if (diff) {
       let ref2;
       this._bgHeight += diff;
@@ -557,17 +556,17 @@ class Canvastimeline {
     if(ref) {
       this._eventlayer_ctx.clearRect(0, ref.yPos + 1, this._cols_in_tbl, ref.height -2);
       ref.events.forEach((ev) => {
-        this._eventlayer_ctx.fillStyle = "#1CA1C1";
+        this._eventlayer_ctx.fillStyle = ev.background || "#1CA1C1";
         this._eventlayer_ctx.fillRect(ev.minx, ev.miny, ev.width, this._cell_height - 1);
-        this._eventlayer_ctx.fillStyle = "#ffffff";
+        this._eventlayer_ctx.fillStyle = ev.color || "#ffffff";
         this._eventlayer_ctx.fillText(ev.name, ev.minx + 4, ev.miny + 10);
       });
     } else {
       this._resources.forEach((r) => {
         r.events.forEach((ev) => {
-          this._eventlayer_ctx.fillStyle = "#1CA1C1";
+          this._eventlayer_ctx.fillStyle = ev.background || "#1CA1C1";
           this._eventlayer_ctx.fillRect(ev.minx, ev.miny, ev.width, this._cell_height - 1);
-          this._eventlayer_ctx.fillStyle = "#ffffff";
+          this._eventlayer_ctx.fillStyle = ev.color || "#ffffff";
           this._eventlayer_ctx.fillText(ev.name, ev.minx + 4, ev.miny + 10);
         });
       });

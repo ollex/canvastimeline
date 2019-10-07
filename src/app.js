@@ -417,7 +417,9 @@ window.onload = function () {
           name: "Olaf inserted",
           resource_id: 8,
           start: "2019-09-05 13:45:00",
-          end: "2019-09-07 11:00:00"
+          end: "2019-09-07 11:00:00",
+          color: "yellow",
+          background: "black"
         });
         f.removeEvent({id: 111, resource_id: 9});
       }, 1000);
