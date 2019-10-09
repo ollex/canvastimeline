@@ -13,6 +13,8 @@ class Canvastimeline {
 			position: relative;
 			width: 100%;
 			height: 100%;
+			border: 1px solid #eee;
+			box-sizing: border-box;
 		}`);
 
       style.insertRule(`.canvastl_scheduler {
@@ -90,25 +92,27 @@ class Canvastimeline {
 
     }
 
-    this._cell_height = 30;
-    this._cell_width = 80;
-    this._num_resources = 1;
-    this._days_in_month = 31;
-    this._cols_in_tbl = this.days_in_month * this._cell_width;
-    this._rows_in_tbl = this._num_resources * this._cell_height;
+    this._viewType = "month";
+    this._cellHeight = 30;
+    this._cellWidth = 180;
+    this._numResources = 1;
+    this._daysInRange = 31;
+    this._colsInTbl = this._daysInRange * this._cellWidth;
+    this._rowsInTbl = this._numResources * this._cellHeight;
     this._days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     this._dayWidths = [];
     this._numWidths = [];
+    this._curFirstOfWeek = null;
     this._curFirstOfMonth = null;
     this._CurMonth = 0;
     this._CurYear = 0;
-    this._res_col_width = 0;
+    this._resColWidth = 0;
     this._bgHeight = 0;
-    this._event_overlap = true;
-    this._scheduler_wrapper = document.createElement("div");
-    this._scheduler_wrapper.height = this._view.height;
-    this._scheduler_wrapper.width = this._view.width;
-    this._scheduler_wrapper.className = "canvastl_scheduler_wrapper";
+    this._eventOverlap = true;
+    this._schedulerWrapper = document.createElement("div");
+    this._schedulerWrapper.height = this._view.height;
+    this._schedulerWrapper.width = this._view.width;
+    this._schedulerWrapper.className = "canvastl_scheduler_wrapper";
     this._loader = document.createElement("div");
     this._loader.className = "canvastimeline-loader";
     this._scheduler = document.createElement("div");
@@ -120,58 +124,58 @@ class Canvastimeline {
     this._background.className = "canvastl_level_0";
     this._background.width = 1860;
     this._background.height = 1500;
-    this._eventlayer = document.createElement("canvas");
-    this._eventlayer.className = "canvastl_level_1";
-    this._eventlayer.width = 1860;
-    this._eventlayer.height = 1500;
-    this._reslayer = document.createElement("canvas");
-    this._reslayer.className = "canvastl_side_canvas";
-    this._reslayer.width = 30;
-    this._reslayer.height = 1500;
-    this._headerlayer = document.createElement("canvas");
-    this._headerlayer.className = "canvastl_top_canvas";
-    this._headerlayer.width = 1890;
-    this._headerlayer.height = 30;
-    this._resheaderlayer = document.createElement("canvas");
-    this._resheaderlayer.className = "canvastl_res_header";
-    this._resheaderlayer.width = 30;
-    this._resheaderlayer.height = 30;
-    this._background_ctx = this._background.getContext("2d");
-    this._eventlayer_ctx = this._eventlayer.getContext("2d");
-    this._reslayer_ctx = this._reslayer.getContext("2d");
-    this._headerlayer_ctx = this._headerlayer.getContext("2d");
-    this._resheaderlayer_ctx = this._resheaderlayer.getContext("2d");
-    this._scheduler_wrapper.appendChild(this._resheaderlayer);
-    this._scheduler_wrapper.appendChild(this._loader);
-    this._scheduler.appendChild(this._headerlayer);
-    this._scheduler.appendChild(this._reslayer);
+    this._eventLayer = document.createElement("canvas");
+    this._eventLayer.className = "canvastl_level_1";
+    this._eventLayer.width = 1860;
+    this._eventLayer.height = 1500;
+    this._resLayer = document.createElement("canvas");
+    this._resLayer.className = "canvastl_side_canvas";
+    this._resLayer.width = 30;
+    this._resLayer.height = 1500;
+    this._headerLayer = document.createElement("canvas");
+    this._headerLayer.className = "canvastl_top_canvas";
+    this._headerLayer.width = 1890;
+    this._headerLayer.height = 30;
+    this._resHeaderLayer = document.createElement("canvas");
+    this._resHeaderLayer.className = "canvastl_res_header";
+    this._resHeaderLayer.width = 30;
+    this._resHeaderLayer.height = 30;
+    this._backgroundCtx = this._background.getContext("2d");
+    this._eventLayerCtx = this._eventLayer.getContext("2d");
+    this._resLayerCtx = this._resLayer.getContext("2d");
+    this._headerLayerCtx = this._headerLayer.getContext("2d");
+    this._resHeaderLayerCtx = this._resHeaderLayer.getContext("2d");
+    this._schedulerWrapper.appendChild(this._resHeaderLayer);
+    this._schedulerWrapper.appendChild(this._loader);
+    this._scheduler.appendChild(this._headerLayer);
+    this._scheduler.appendChild(this._resLayer);
     this._scheduler.appendChild(this._background);
-    this._scheduler.appendChild(this._eventlayer);
-    this._scheduler_wrapper.appendChild(this._scheduler);
-    this._view.appendChild(this._scheduler_wrapper);
+    this._scheduler.appendChild(this._eventLayer);
+    this._schedulerWrapper.appendChild(this._scheduler);
+    this._view.appendChild(this._schedulerWrapper);
     this._resources = [];
     this.sidecols = [];
     this._resources = new Map();
-    this._resources_idx = new Map();
+    this._resourcesIdx = new Map();
     this._sidecols = new Map();
     this._helpArray = [];
-    this._max_cell_height = this._cell_height;
+    this._maxCellHeight = this._cellHeight;
     this._onEventFound = null;
 
-    this._background_ctx.font = "12px Arial";
+    this._backgroundCtx.font = "12px Arial";
     for (let i = 1; i < 32; i++) {
-      this._numWidths[i - 1] = this._background_ctx.measureText('' + i).width;
+      this._numWidths[i - 1] = this._backgroundCtx.measureText('' + i).width;
     }
     this._days.forEach((d, idx) => {
-      this._dayWidths[idx] = this._background_ctx.measureText(d).width;
+      this._dayWidths[idx] = this._backgroundCtx.measureText(d).width;
     });
 
-    this._eventlayer.onclick = this.findEventByXY.bind(this);
+    this._eventLayer.onclick = this.findEventByXY.bind(this);
   }
 
 
   destroy(removeParent) {
-    this._eventlayer.removeEventListener("click", this.findEventByXY);
+    this._eventLayer.removeEventListener("click", this.findEventByXY);
     while (this._view.firstChild) {
       this._view.removeChild(this._view.firstChild);
     }
@@ -193,16 +197,16 @@ class Canvastimeline {
   prepareResources(resources) {
     // the resoucres_idx is useful for indexing if we do not allow event overlap
     // if we do allow it we need to calculate min and max to save on cycles until we find rescource
-    this._resources_idx.clear();
+    this._resourcesIdx.clear();
     this._resources.clear();
     this._sidecols.clear();
-    this._res_col_width = 0;
+    this._resColWidth = 0;
     this._helpArray = [];
     let curPosX = 0;
     this.sidecols.forEach((s, idx) => {
       let newX = {};
       Object.keys(s).forEach((k) => {
-        this._res_col_width += s[k];
+        this._resColWidth += s[k];
         newX[s] = s[k];
         this._helpArray.push({
           name: k,
@@ -222,20 +226,20 @@ class Canvastimeline {
         }
       });
       this._resources.set(r.id, r);
-      this._resources_idx.set(idx, r.id);
+      this._resourcesIdx.set(idx, r.id);
     });
   }
 
   removeEventsAndResetResourceGeometry() {
     let curY = 0;
-    this._max_cell_height = this._cell_height;
+    this._maxCellHeight = this._cellHeight;
     this._resources.forEach((value, key, map) => {
       value.yPos = curY;
-      value.height = this._cell_height;
-      curY += this._cell_height;
+      value.height = this._cellHeight;
+      curY += this._cellHeight;
       value.events = [];
     });
-    this._bgHeight = this._resources.size * this._cell_height;
+    this._bgHeight = this._resources.size * this._cellHeight;
   }
 
   showLoader() {
@@ -247,12 +251,34 @@ class Canvastimeline {
   }
 
   calcTicksAndWidth() {
-    this._days_in_month = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
-    this._numTicksInMonth = 86400 * this._days_in_month * 1000;
-    this._cols_in_tbl = this._days_in_month * this._cell_width;
+    switch (this._viewType) {
+      case "month":
+        this._daysInRange = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
+        break;
+      case "week":
+        this._daysInRange = 7;
+        break;
+      default:
+        throw new Error("View Type is not set correctly!");
+    }
+
+    this._numTicksInRange = 86400 * this._daysInRange * 1000;
+    this._colsInTbl = this._daysInRange * this._cellWidth;
+    this._scheduler.style.maxWidth = this._colsInTbl + 'px';
   }
 
-  prepareMonth() {
+  // for monday...
+  calcMonday(d) {
+    const currentWeekDay = d.getDay();
+    let wkStart = new Date(new Date(d).setDate(d.getDate() - (currentWeekDay == 0 ? 6 : currentWeekDay -1)));
+    wkStart.setHours(0);
+    wkStart.setMinutes(0);
+    wkStart.setSeconds(0);
+    wkStart.setMilliseconds(0);
+    return wkStart
+  }
+
+  prepareRange() {
     this.calcTicksAndWidth();
     this.removeEventsAndResetResourceGeometry();
     this.setSizesAndPositionsBeforeRedraw();
@@ -260,45 +286,95 @@ class Canvastimeline {
     this.drawResources();
   }
 
-  prevMonth() {
-    this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() - 1);
-    this._CurMonth = this._curFirstOfMonth.getMonth();
-    this._CurYear = this._curFirstOfMonth.getFullYear();
-    this.prepareMonth()
+  prevRange() {
+    switch (this._viewType) {
+      case "month":
+        this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() - 1);
+        this._CurMonth = this._curFirstOfMonth.getMonth();
+        this._CurYear = this._curFirstOfMonth.getFullYear();
+        break;
+      case "week":
+        this._curFirstOfWeek.setDate(this._curFirstOfWeek.getDate() - 7);
+        break;
+      default:
+
+    }
+    this.prepareRange()
   }
 
-  nextMonth() {
-    this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() + 1);
-    this._CurMonth = this._curFirstOfMonth.getMonth();
-    this._CurYear = this._curFirstOfMonth.getFullYear();
-    this.prepareMonth();
+  nextRange() {
+    switch (this._viewType) {
+      case "month":
+        this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() + 1);
+        this._CurMonth = this._curFirstOfMonth.getMonth();
+        this._CurYear = this._curFirstOfMonth.getFullYear();
+        break;
+      case "week":
+        this._curFirstOfWeek.setDate(this._curFirstOfWeek.getDate() + 7);
+        break;
+      default:
+        throw new Error("View Type is not set correctly!");
+    }
+    this.prepareRange();
   }
 
-  setMonth(d) {
-    this._curFirstOfMonth = new Date();
-    this._curFirstOfMonth.setFullYear(d.getFullYear());
-    this._curFirstOfMonth.setMonth(d.getMonth());
-    this._curFirstOfMonth.setDate(1);
-    this._curFirstOfMonth.setHours(0);
-    this._curFirstOfMonth.setMinutes(0);
-    this._curFirstOfMonth.setSeconds(0);
-    this._curFirstOfMonth.setMilliseconds(0);
-    this._CurMonth = d.getMonth();
-    this._CurYear = d.getFullYear();
+  setViewType(typeStr) {
+    if(typeStr === 'week') {
+      this._viewType = 'week';
+    } else if(typeStr === 'month') {
+      this._viewType = 'month';
+    } else {
+      throw new Error("View Type must be either week or month!");
+    }
+  }
 
-    this.calcTicksAndWidth();
+  setRangeStartDate(d) {
+    switch (this._viewType) {
+      case "month":
+        this._curFirstOfMonth = new Date();
+        this._curFirstOfMonth.setFullYear(d.getFullYear());
+        this._curFirstOfMonth.setMonth(d.getMonth());
+        this._curFirstOfMonth.setDate(1);
+        this._curFirstOfMonth.setHours(0);
+        this._curFirstOfMonth.setMinutes(0);
+        this._curFirstOfMonth.setSeconds(0);
+        this._curFirstOfMonth.setMilliseconds(0);
+        this._CurMonth = d.getMonth();
+        this._CurYear = d.getFullYear();
+        if(this._curFirstOfMonth.getDay() === 1) {
+          this._curFirstOfWeek = this._curFirstOfMonth;
+        } else if(this._curFirstOfMonth.getDay() === 0) {
+          this._curFirstOfWeek = new Date(this._curFirstOfMonth.getFullYear(), this._curFirstOfMonth.getMonth(), 9);
+        } else {
+          this._curFirstOfWeek = this.calcMonday(this._curFirstOfMonth);
+        }
+        break;
+      case "week":
+        this._curFirstOfWeek = this.calcMonday(d);
+        this._curFirstOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+        this._CurMonth = d.getMonth();
+        this._CurYear = d.getFullYear();
+    }
+    this.prepareRange();
   }
 
   getXPos(St) {
-    return this._cols_in_tbl * ((St - this._curFirstOfMonth.getTime()) / this._numTicksInMonth)
+    switch(this._viewType) {
+      case "month":
+        return this._colsInTbl * ((St - this._curFirstOfMonth.getTime()) / this._numTicksInRange);
+        break;
+      case "week":
+        return this._colsInTbl * ((St - this._curFirstOfWeek.getTime()) / this._numTicksInRange);
+    }
+
   }
 
   getWidth(S, E) {
-    return this._cols_in_tbl * ((E - S) / this._numTicksInMonth);
+    return this._colsInTbl * ((E - S) / this._numTicksInRange);
   }
   // is useful without event overlap only, really
   getYPos(resource_id) {
-    return (this._resources.get(resource_id).idx * this._cell_height) + 1;
+    return (this._resources.get(resource_id).idx * this._cellHeight) + 1;
   }
 
   parseDate(str) {
@@ -309,24 +385,25 @@ class Canvastimeline {
   }
 
   loadEvents(arrayOfEventObjects) {
-    //_resources_idx
-    let failureArray = [], maximum_resource_height = this._cell_height;
+    let failureArray = [], maximum_resource_height = this._cellHeight;
     try {
       for (let ev of arrayOfEventObjects) {
+        // think about storing the Date on the event not only the initial strings
+        // for performance reasons as comparing the Date (a number) with the visible range
+        // could be faster like that?
         let startDate = this.parseDate(ev.start);
         let endDate = this.parseDate(ev.end);
         ev.minx = this.getXPos(startDate.getTime());
         ev.width = this.getWidth(startDate.getTime(), endDate.getTime());
         try {
-          // maybe we can save on this getYPos call in case we use event_overlap = true
           ev.miny = this.getYPos(ev.resource_id);
           this._resources.get(ev.resource_id).events.push(ev);
         } catch (err) {
-          // this one most probably has a resource_id that has not been initialized with the _resources
           failureArray.push(ev);
         }
       }
     } catch (err) {
+      console.log(err);
       throw new Error("Event Object Array does not match signature!");
     }
     // make the yPos values for each event match in case of overlaps
@@ -367,10 +444,10 @@ class Canvastimeline {
             if (maxWidthOfEvent < e.width) {
               maxWidthOfEvent = e.width;
             }
-            while (isConflict(e.minx, e.minx + e.width, value.yPos + curLevel * this._cell_height + 1, e.id)) {
+            while (isConflict(e.minx, e.minx + e.width, value.yPos + curLevel * this._cellHeight + 1, e.id)) {
               curLevel++;
             }
-            e.miny = value.yPos + curLevel * this._cell_height + 1;
+            e.miny = value.yPos + curLevel * this._cellHeight + 1;
             value.events.push(e);
             if (curLevel > maxHeightFactor) {
               maxHeightFactor = curLevel;
@@ -379,16 +456,16 @@ class Canvastimeline {
         });
         maxHeightFactor += 1;
         value.max_event_width = maxWidthOfEvent;
-        if (this._max_cell_height < maxHeightFactor * this._cell_height) {
-          this._max_cell_height = maxHeightFactor * this._cell_height;
+        if (this._maxCellHeight < maxHeightFactor * this._cellHeight) {
+          this._maxCellHeight = maxHeightFactor * this._cellHeight;
         }
-        value.height = maxHeightFactor > 0 ? maxHeightFactor * this._cell_height : this._cell_height;
+        value.height = maxHeightFactor > 0 ? maxHeightFactor * this._cellHeight : this._cellHeight;
         prevY += value.height;
       } else {
         value.max_event_width = 0;
-        value.height = this._cell_height;
+        value.height = this._cellHeight;
         value.yPos = prevY;
-        prevY += this._cell_height;
+        prevY += this._cellHeight;
       }
     });
     this._bgHeight = prevY;
@@ -405,11 +482,6 @@ class Canvastimeline {
     console.log("Load and draw Events: "  + (ed / 1000000 ) + "s");
   }
 
-  /**
-   * the ev argument needs to contain at least the event's id
-   * and the resource_id field
-   */
-
   removeEvent(ev) {
      const { id, resource_id } = ev;
      if(id && resource_id) {
@@ -423,8 +495,6 @@ class Canvastimeline {
        if(idx !== -1) {
          const removed = ref.events.splice(idx, 1)[0];
          this._adjustResourceRow(ref);
-         //this._eventlayer_ctx.clearRect(removed.minx, removed.miny, removed.width, this._cell_height -1);
-
        } else {
          throw new Error("Event not found");
        }
@@ -470,10 +540,10 @@ class Canvastimeline {
         if (maxWidthOfEvent < e.width) {
           maxWidthOfEvent = e.width;
         }
-        while (isConflict(e.minx, e.minx + e.width, ref.yPos + curLevel * this._cell_height + 1, e.id)) {
+        while (isConflict(e.minx, e.minx + e.width, ref.yPos + curLevel * this._cellHeight + 1, e.id)) {
           curLevel++;
         }
-        e.miny = ref.yPos + curLevel * this._cell_height + 1;
+        e.miny = ref.yPos + curLevel * this._cellHeight + 1;
         ref.events.push(e);
         if (curLevel > maxHeightF) {
           maxHeightF = curLevel;
@@ -482,16 +552,16 @@ class Canvastimeline {
     });
     maxHeightF += 1;
     ref.max_event_width = maxWidthOfEvent;
-    if (this._max_cell_height < maxHeightF * this._cell_height) {
-      this._max_cell_height = maxHeightF * this._cell_height;
+    if (this._maxCellHeight < maxHeightF * this._cellHeight) {
+      this._maxCellHeight = maxHeightF * this._cellHeight;
     }
-    ref.height = maxHeightF > 0 ? maxHeightF * this._cell_height : this._cell_height;
+    ref.height = maxHeightF > 0 ? maxHeightF * this._cellHeight : this._cellHeight;
     const diff = ref.height - prevHeight;
     if (diff) {
       let ref2;
       this._bgHeight += diff;
       for (let i = ref.idx + 1; i < this._resources.size; i++) {
-        ref2 = this._resources.get(this._resources_idx.get(i));
+        ref2 = this._resources.get(this._resourcesIdx.get(i));
         ref2.yPos += diff;
         ref2.events.forEach(function (ev) {
           ev.miny += diff;
@@ -504,11 +574,6 @@ class Canvastimeline {
     } else {
       this.drawEvents(ref);
     }
-    // redrawing from actual yPos only works if we do not have to change the height of the 3 involved canvases.
-    // so in the future check first if bgHeight has changed at all and then maybe only redraw the changed part
-    // optimally just make a copy of all lower parts and then re-insert that at the new position after drawing
-    // the actually changed row...
-
   }
 
   addEvent(ev) {
@@ -535,7 +600,7 @@ class Canvastimeline {
     const rect = ev.target.getBoundingClientRect();
     const x = ev.clientX - rect.left; //x position within the element.
     const y = ev.clientY - rect.top;
-    let startIdx = y / this._max_cell_height - 1;
+    let startIdx = y / this._maxCellHeight - 1;
     let endIdx = this._resources.size - 1;
     //this.findEventByXY(x, y, minIdx, this._resources.size - 1);
     // don't bother if no one is interested...
@@ -548,13 +613,13 @@ class Canvastimeline {
     let start = startIdx, end = endIdx, id, mid;
     while (start <= end) {
       mid = Math.floor((start + end) / 2);
-      id = this._resources_idx.get(mid);
+      id = this._resourcesIdx.get(mid);
       ref = this._resources.get(id);
       let l = ref.events.length, ev;
       if (ref.yPos <= y && ref.yPos + ref.height >= y) {
         for (let i = 0; i < l; i++) {
           ev = ref.events[i];
-          if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cell_height - 1 >= y)) {
+          if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cellHeight - 1 >= y)) {
             return this._onEventFound(ev, ref.id);
           }
         }
@@ -569,24 +634,24 @@ class Canvastimeline {
 
   drawEvents(ref) {
     if(ref) {
-      this._eventlayer_ctx.clearRect(0, ref.yPos + 1, this._cols_in_tbl, ref.height -2);
+      this._eventLayerCtx.clearRect(0, ref.yPos + 1, this._colsInTbl, ref.height);
       ref.events.forEach((ev) => {
-        this._eventlayer_ctx.fillStyle = ev.background || "#1CA1C1";
-        this._eventlayer_ctx.fillRect(ev.minx, ev.miny, ev.width, this._cell_height - 1);
-        this._eventlayer_ctx.fillStyle = ev.color || "#ffffff";
-        this._eventlayer_ctx.fillText(ev.name, ev.minx + 4, ev.miny + 10);
+        this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
+        this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
+        this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
+        this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10);
       });
     } else {
       this._resources.forEach((r) => {
         r.events.forEach((ev) => {
-          this._eventlayer_ctx.fillStyle = ev.background || "#1CA1C1";
-          this._eventlayer_ctx.fillRect(ev.minx, ev.miny, ev.width, this._cell_height - 1);
-          this._eventlayer_ctx.fillStyle = ev.color || "#ffffff";
-          this._eventlayer_ctx.fillText(ev.name, ev.minx + 4, ev.miny + 10);
+          this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
+          this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
+          this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
+          this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10);
         });
       });
     }
-    this._eventlayer_ctx.stroke();
+    this._eventLayerCtx.stroke();
   }
 
   separate(array) {
@@ -627,63 +692,75 @@ class Canvastimeline {
   }
 
   setSizesAndPositionsBeforeRedraw() {
-    this._reslayer.width = this._resheaderlayer.width = this._res_col_width;
-    this._reslayer.height = this._eventlayer.height = this._background.height = this._bgHeight; //cell_height * _resources.size;
-    this._eventlayer.width = this._background.width = this._cols_in_tbl;
-    this._headerlayer.width = this._cols_in_tbl + this._res_col_width;
-    this._eventlayer.style.left = this._background.style.left = this._res_col_width + 'px';
-    this._background_ctx.font = "12px Arial";
-    this._eventlayer_ctx.font = "12px Arial";
-    this._reslayer_ctx.font = "12px Arial";
-    this._headerlayer_ctx.font = "12px Arial";
-    this._resheaderlayer_ctx.font = "12px Arial";
+    this._resLayer.width = this._resHeaderLayer.width = this._resColWidth;
+    this._resLayer.height = this._eventLayer.height = this._background.height = this._bgHeight; //cell_height * _resources.size;
+    this._eventLayer.width = this._background.width = this._colsInTbl;
+    this._headerLayer.width = this._colsInTbl + this._resColWidth;
+    this._eventLayer.style.left = this._background.style.left = this._resColWidth + 'px';
+    this._backgroundCtx.font = "12px Arial";
+    this._eventLayerCtx.font = "12px Arial";
+    this._resLayerCtx.font = "12px Arial";
+    this._headerLayerCtx.font = "12px Arial";
+    this._resHeaderLayerCtx.font = "12px Arial";
   }
 
   drawResources() {
 
     this._helpArray.forEach((obj) => {
-      this._resheaderlayer_ctx.fillText(obj.name, obj.posX + 2, this._cell_height / 2);
+      this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._cellHeight / 2);
     });
 
-    this._resheaderlayer_ctx.stroke();
-    this._reslayer_ctx.fillStyle = "#333";
-    this._reslayer_ctx.textBaseline = "top";
-    this._reslayer_ctx.lineWidth = 1;
-    this._reslayer_ctx.strokeStyle = '#eee';
-    this._reslayer_ctx.translate(0.5, 0.5);
+    this._resHeaderLayerCtx.stroke();
+    this._resLayerCtx.fillStyle = "#333";
+    this._resLayerCtx.textBaseline = "top";
+    this._resLayerCtx.lineWidth = 1;
+    this._resLayerCtx.strokeStyle = '#eee';
+    this._resLayerCtx.translate(0.5, 0.5);
 
     this._helpArray.forEach((obj, idx) => {
       if (idx) {
-        this._reslayer_ctx.moveTo(obj.posX, 0);
-        this._reslayer_ctx.lineTo(obj.posX, this._reslayer.height);
+        this._resLayerCtx.moveTo(obj.posX, 0);
+        this._resLayerCtx.lineTo(obj.posX, this._resLayer.height);
       }
     });
-    this._resheaderlayer_ctx.translate(-0.5, -0.5);
+    this._resHeaderLayerCtx.translate(-0.5, -0.5);
 
     this._resources.forEach((value, key, map) => {
       this._helpArray.forEach((obj) => {
-        this._reslayer_ctx.fillText(value[obj.name], obj.posX, value.yPos)
+        this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos)
       });
-      this._reslayer_ctx.moveTo(0, value.yPos);
-      this._reslayer_ctx.lineTo(this._res_col_width, value.yPos);
+      this._resLayerCtx.moveTo(0, value.yPos);
+      this._resLayerCtx.lineTo(this._resColWidth, value.yPos);
     });
 
-    this._reslayer_ctx.stroke();
+    this._resLayerCtx.stroke();
   }
 
   drawDayLines() {
-    let curDay = this._curFirstOfMonth.getDay();
-
-    this._background_ctx.lineWidth = 1;
-    this._background_ctx.translate(0.5, 0.5)
-    this._background_ctx.strokeStyle = "#eee";
-    this._headerlayer_ctx.textBaseline = "top";
-    this._headerlayer_ctx.fillStyle = '#333';
-    for (let i = 0; i < this._days_in_month; i++) {
-      this._background_ctx.moveTo(i * this._cell_width, 0);
-      this._background_ctx.lineTo(i * this._cell_width, this._bgHeight);
-      this._headerlayer_ctx.fillText(i + 1, i * this._cell_width + (this._cell_width / 2) + this._res_col_width - this._numWidths[i] / 2, 4);
-      this._headerlayer_ctx.fillText(this._days[curDay], i * this._cell_width + (this._cell_width / 2) + this._res_col_width - this._dayWidths[curDay] / 2, 16);
+    let curDay;
+    switch (this._viewType) {
+      case "month":
+        curDay = this._curFirstOfMonth.getDay();
+        break;
+      case "week":
+        curDay = this._curFirstOfWeek.getDay();
+        break;
+      default:
+        throw new Error("View Type is not set correctly!");
+    }
+    let weekDate = new Date(this._curFirstOfWeek);
+    weekDate.setDate(weekDate.getDate() - 1);
+    this._backgroundCtx.lineWidth = 1;
+    this._backgroundCtx.translate(0.5, 0.5)
+    this._backgroundCtx.strokeStyle = "#eee";
+    this._headerLayerCtx.textBaseline = "top";
+    this._headerLayerCtx.fillStyle = '#333';
+    for (let i = 0; i < this._daysInRange; i++) {
+      weekDate.setDate(weekDate.getDate() + 1);
+      this._backgroundCtx.moveTo(i * this._cellWidth, 0);
+      this._backgroundCtx.lineTo(i * this._cellWidth, this._bgHeight);
+      this._headerLayerCtx.fillText(this._viewType === "month" ? (i + 1) : weekDate.getDate(), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[i] / 2, 4);
+      this._headerLayerCtx.fillText(this._days[curDay], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[curDay] / 2, 16);
       if (curDay < 6) {
         curDay++;
       } else {
@@ -691,12 +768,12 @@ class Canvastimeline {
       }
     }
     this._resources.forEach((value, key, map) => {
-      this._background_ctx.moveTo(0, value.yPos);
-      this._background_ctx.lineTo(this._cols_in_tbl, value.yPos);
+      this._backgroundCtx.moveTo(0, value.yPos);
+      this._backgroundCtx.lineTo(this._colsInTbl, value.yPos);
     })
-    this._background_ctx.translate(-0.5, -0.5);
-    this._background_ctx.stroke();
-    this._headerlayer_ctx.stroke();
+    this._backgroundCtx.translate(-0.5, -0.5);
+    this._backgroundCtx.stroke();
+    this._headerLayerCtx.stroke();
   }
 
   initCalendar(obj) {
@@ -715,12 +792,19 @@ class Canvastimeline {
       this._scheduler.style.height = "100vH";
       document.body.style.margin = "0";
     }
+    if(obj.hasOwnProperty("viewType")) {
+      if(obj.viewType === "month" || obj.viewType === "week") {
+        this.setViewType(obj.viewType);
+      } else {
+        throw new Error("View Type must be month or week!");
+      }
+    }
 
     this.prepareResources(obj.resources);
     if (obj.hasOwnProperty("start")) {
-      this.setMonth(obj.start);
+      this.setRangeStartDate(obj.start);
     } else {
-      this.setMonth(new Date());
+      this.setRangeStartDate(new Date());
     }
     this.setSizesAndPositionsBeforeRedraw();
     this.drawDayLines();
