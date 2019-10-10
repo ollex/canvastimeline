@@ -197,8 +197,6 @@ class Canvastimeline {
   }
 
   prepareResources(resources) {
-    // the resoucres_idx is useful for indexing if we do not allow event overlap
-    // if we do allow it we need to calculate min and max to save on cycles until we find rescource
     this._resourcesIdx.clear();
     this._resources.clear();
     this._sidecols.clear();
@@ -212,7 +210,8 @@ class Canvastimeline {
         newX[s] = s[k];
         this._helpArray.push({
           name: k,
-          posX: curPosX
+          posX: curPosX,
+          width: s[k]
         });
         curPosX += s[k];
       });
@@ -370,20 +369,12 @@ class Canvastimeline {
 
   getXPos(St) {
     return this._colsInTbl * ((St - this._curFirstOfRange.getTime()) / this._numTicksInRange);
-    /*switch(this._viewType) {
-      case "month":
-        return this._colsInTbl * ((St - this._curFirstOfMonth.getTime()) / this._numTicksInRange);
-        break;
-      case "week":
-        return this._colsInTbl * ((St - this._curFirstOfWeek.getTime()) / this._numTicksInRange);
-    }*/
-
   }
 
   getWidth(S, E) {
     return this._colsInTbl * ((E - S) / this._numTicksInRange);
   }
-  // is useful without event overlap only, really
+
   getYPos(resource_id) {
     return (this._resources.get(resource_id).idx * this._cellHeight) + 1;
   }
@@ -647,7 +638,7 @@ class Canvastimeline {
         this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
         this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
         this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
-        this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10);
+        this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
       });
     } else {
       this._resources.forEach((r) => {
@@ -655,7 +646,7 @@ class Canvastimeline {
           this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
           this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
           this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
-          this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10);
+          this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
         });
       });
     }
@@ -715,7 +706,7 @@ class Canvastimeline {
   drawResources() {
 
     this._helpArray.forEach((obj) => {
-      this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._cellHeight / 2);
+      this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._cellHeight / 2, obj.width - 2);
     });
 
     this._resHeaderLayerCtx.stroke();
@@ -735,7 +726,7 @@ class Canvastimeline {
 
     this._resources.forEach((value, key, map) => {
       this._helpArray.forEach((obj) => {
-        this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos)
+        this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos, obj.width - 2);
       });
       this._resLayerCtx.moveTo(0, value.yPos);
       this._resLayerCtx.lineTo(this._resColWidth, value.yPos);
