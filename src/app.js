@@ -219,15 +219,21 @@ window.onload = function () {
           f.setViewType("year");
           f.setCellWidth(30);
           f.setRangeStartDate(new Date(2020, 0, 2));
-          f.addEvent({
-            id: 115,
-            name: "Olaf inserted",
-            resource_id: 8,
-            start: "2020-01-04 13:45:00",
-            end: "2020-01-08 11:00:00",
-            color: "white",
-            background: "green"
-          })
+          let evts = [], x, y;
+          for(let i = 0; i < 700; i++) {
+            x = Math.ceil(Math.random() * 7);
+            y = x + 1;
+            evts.push({
+              id: i + 115,
+              name: i + '_event',
+              resource_id: Math.ceil(Math.random() * 19),
+              start: "2020-0" + x + "-0"+x + " 15:00:00",
+              end: "2020-0" + y + "-0"+x + " 11:00:00"
+            });
+          }
+          let st = performance.now();
+          f.loadAndDrawEvents(evts);
+          console.log((performance.now() - st) + 'ms');
         }, 2000)
       }, 1000);
       f.hideLoader();

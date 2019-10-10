@@ -30,3 +30,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 One of the limits is (depending on the browser) the size constraints of canvases. So there is no unlimited amount of resources, events and cellWidth or cellHeight possible.
 Reasonable limits are for example for a year view cell width 30 (px), for a month view 60-180 (px) and for a week view more but probably never really necessary.
 For number of resources - if you stay below 200 with a cell height of 30 (px) you should be fine in most browsers, if you want to limit the cellHeight to 15px (if you do not need 2 lines of text that's reasonable for example) then you can double the amount of resources possible.
+
+# Performance - just very quick and dirty
+Placing performance.now() on my laptop which should be some mid-range equipment (i7 5500 dual core, NVDIA Geforce 920M) for example comes back after 18 - 20ms on average for the app.js example last loadAndDrawEvents call with 700 (many overlapping) events in the year view.
+This is probably good enough for most business apps, seems like canvas is a good option for small to medium amount of resource columns and no extra-wide/high cells. The browser memory after that app.js run is at something around 50MB in Chrome.

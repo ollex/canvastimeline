@@ -771,7 +771,6 @@ class Canvastimeline {
         z.setDate(z.getDate() + 6);
         const nameStr = this._curFirstOfRange.toLocaleDateString() + ' - ' + z.toLocaleDateString();
         const w = this._headerLayerCtx.measureText(nameStr);
-        console.log(w);
         this._headerLayerCtx.fillText(nameStr, this._daysInRange / 2 * this._cellWidth + this._resColWidth - w.width, 2);
         break;
       default:
