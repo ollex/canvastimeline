@@ -28,7 +28,7 @@ class Canvastimeline {
 		.canvastl_level_1 {
 			position: absolute;
 			left: 30px;
-			top: 30px;
+			top: 45px;
 		}`);
 
       style.insertRule(`.canvastl_side_canvas {
@@ -100,6 +100,8 @@ class Canvastimeline {
     this._colsInTbl = this._daysInRange * this._cellWidth;
     this._rowsInTbl = this._numResources * this._cellHeight;
     this._days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    this._months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    this._monthWidths = [];
     this._dayWidths = [];
     this._numWidths = [];
     this._curFirstOfRange = null;
@@ -132,11 +134,11 @@ class Canvastimeline {
     this._headerLayer = document.createElement("canvas");
     this._headerLayer.className = "canvastl_top_canvas";
     this._headerLayer.width = 1890;
-    this._headerLayer.height = 30;
+    this._headerLayer.height = 45;
     this._resHeaderLayer = document.createElement("canvas");
     this._resHeaderLayer.className = "canvastl_res_header";
     this._resHeaderLayer.width = 30;
-    this._resHeaderLayer.height = 30;
+    this._resHeaderLayer.height = 45;
     this._backgroundCtx = this._background.getContext("2d");
     this._eventLayerCtx = this._eventLayer.getContext("2d");
     this._resLayerCtx = this._resLayer.getContext("2d");
@@ -165,6 +167,9 @@ class Canvastimeline {
     }
     this._days.forEach((d, idx) => {
       this._dayWidths[idx] = this._backgroundCtx.measureText(d).width;
+    });
+    this._months.forEach((m, idx) => {
+      this._monthWidths[idx] = this._backgroundCtx.measureText(m).width;
     });
 
     this._eventLayer.onclick = this.findEventByXY.bind(this);
@@ -744,7 +749,7 @@ class Canvastimeline {
     let weekDate = new Date(this._curFirstOfRange);
     weekDate.setDate(weekDate.getDate() - 1);
     this._backgroundCtx.lineWidth = 1;
-    this._backgroundCtx.translate(0.5, 0.5)
+    this._backgroundCtx.translate(0.5, 0.5);
     this._backgroundCtx.strokeStyle = "#eee";
     this._headerLayerCtx.textBaseline = "top";
     this._headerLayerCtx.fillStyle = '#333';
@@ -752,9 +757,33 @@ class Canvastimeline {
       weekDate.setDate(weekDate.getDate() + 1);
       this._backgroundCtx.moveTo(i * this._cellWidth, 0);
       this._backgroundCtx.lineTo(i * this._cellWidth, this._bgHeight);
-      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 4);
-      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 16);
-
+      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 19);
+      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 31);
+    }
+    // draw headers according to view
+    let z;
+    switch(this._viewType) {
+      case "year":
+        let curDaysInMonth, sumOfDays = 0;
+        for(let i = 0; i < 12; i++) {
+          curDaysInMonth = new Date(this._curFirstOfRange.getFullYear(), i + 1, 0).getDate();
+          sumOfDays += curDaysInMonth;
+          this._headerLayerCtx.fillText(this._months[i], sumOfDays * this._cellWidth - (curDaysInMonth / 2 * this._cellWidth) + this._resColWidth - this._monthWidths[i], 2);
+        }
+        break;
+      case "month":
+        z = this._curFirstOfRange.getMonth();
+        this._headerLayerCtx.fillText(this._months[z], this._daysInRange / 2 * this._cellWidth + this._resColWidth - this._monthWidths[z], 2);
+        break;
+      case "week":
+        z = new Date(this._curFirstOfRange);
+        z.setDate(z.getDate() + 6);
+        const nameStr = this._curFirstOfRange.toLocaleDateString() + ' - ' + z.toLocaleDateString();
+        const w = this._headerLayerCtx.measureText(nameStr);
+        console.log(w);
+        this._headerLayerCtx.fillText(nameStr, this._daysInRange / 2 * this._cellWidth + this._resColWidth - w.width, 2);
+        break;
+      default:
     }
     this._resources.forEach((value, key, map) => {
       this._backgroundCtx.moveTo(0, value.yPos);
