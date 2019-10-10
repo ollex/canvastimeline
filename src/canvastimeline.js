@@ -102,10 +102,7 @@ class Canvastimeline {
     this._days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     this._dayWidths = [];
     this._numWidths = [];
-    this._curFirstOfWeek = null;
-    this._curFirstOfMonth = null;
-    this._CurMonth = 0;
-    this._CurYear = 0;
+    this._curFirstOfRange = null;
     this._resColWidth = 0;
     this._bgHeight = 0;
     this._eventOverlap = true;
@@ -250,10 +247,22 @@ class Canvastimeline {
     this._loader.style.display = "none";
   }
 
+  setCellWidth(val) {
+    this._cellWidth = val;
+  }
+
   calcTicksAndWidth() {
     switch (this._viewType) {
+      case "year":
+        const year = this._curFirstOfRange.getFullYear();
+        if(year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
+          this._daysInRange = 366;
+        } else {
+          this._daysInRange = 365;
+        }
+        break;
       case "month":
-        this._daysInRange = new Date(this._CurYear, this._CurMonth + 1, 0).getDate();
+        this._daysInRange = new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 1, 0).getDate();
         break;
       case "week":
         this._daysInRange = 7;
@@ -289,12 +298,13 @@ class Canvastimeline {
   prevRange() {
     switch (this._viewType) {
       case "month":
-        this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() - 1);
-        this._CurMonth = this._curFirstOfMonth.getMonth();
-        this._CurYear = this._curFirstOfMonth.getFullYear();
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() -1);
+        break;
+      case "year":
+        this._curFirstOfRange.setFullYear(this._curFirstOfRange.getFullYear() - 1);
         break;
       case "week":
-        this._curFirstOfWeek.setDate(this._curFirstOfWeek.getDate() - 7);
+        this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() - 7);
         break;
       default:
 
@@ -304,13 +314,14 @@ class Canvastimeline {
 
   nextRange() {
     switch (this._viewType) {
+      case "year":
+        this._curFirstOfRange.setYear(this._curFirstOfRange.getFullYear() + 1);
+        break;
       case "month":
-        this._curFirstOfMonth.setMonth(this._curFirstOfMonth.getMonth() + 1);
-        this._CurMonth = this._curFirstOfMonth.getMonth();
-        this._CurYear = this._curFirstOfMonth.getFullYear();
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() + 1);
         break;
       case "week":
-        this._curFirstOfWeek.setDate(this._curFirstOfWeek.getDate() + 7);
+        this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() + 7);
         break;
       default:
         throw new Error("View Type is not set correctly!");
@@ -323,49 +334,44 @@ class Canvastimeline {
       this._viewType = 'week';
     } else if(typeStr === 'month') {
       this._viewType = 'month';
+    } else if(typeStr === 'year') {
+      this._viewType = 'year';
     } else {
       throw new Error("View Type must be either week or month!");
     }
   }
 
+  // to do!!! refactor to have multiple firstOf variables to be _curFirstOfRange only always
   setRangeStartDate(d) {
     switch (this._viewType) {
       case "month":
-        this._curFirstOfMonth = new Date();
-        this._curFirstOfMonth.setFullYear(d.getFullYear());
-        this._curFirstOfMonth.setMonth(d.getMonth());
-        this._curFirstOfMonth.setDate(1);
-        this._curFirstOfMonth.setHours(0);
-        this._curFirstOfMonth.setMinutes(0);
-        this._curFirstOfMonth.setSeconds(0);
-        this._curFirstOfMonth.setMilliseconds(0);
-        this._CurMonth = d.getMonth();
-        this._CurYear = d.getFullYear();
-        if(this._curFirstOfMonth.getDay() === 1) {
-          this._curFirstOfWeek = this._curFirstOfMonth;
-        } else if(this._curFirstOfMonth.getDay() === 0) {
-          this._curFirstOfWeek = new Date(this._curFirstOfMonth.getFullYear(), this._curFirstOfMonth.getMonth(), 9);
-        } else {
-          this._curFirstOfWeek = this.calcMonday(this._curFirstOfMonth);
-        }
+        this._curFirstOfRange = new Date();
+        this._curFirstOfRange.setFullYear(d.getFullYear());
+        this._curFirstOfRange.setMonth(d.getMonth());
+        this._curFirstOfRange.setDate(1);
+        this._curFirstOfRange.setHours(0);
+        this._curFirstOfRange.setMinutes(0);
+        this._curFirstOfRange.setSeconds(0);
+        this._curFirstOfRange.setMilliseconds(0);
+        break;
+      case 'year':
+        this._curFirstOfRange = new Date(d.getFullYear(), 0, 1);
         break;
       case "week":
-        this._curFirstOfWeek = this.calcMonday(d);
-        this._curFirstOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
-        this._CurMonth = d.getMonth();
-        this._CurYear = d.getFullYear();
+        this._curFirstOfRange = this.calcMonday(d);
     }
     this.prepareRange();
   }
 
   getXPos(St) {
-    switch(this._viewType) {
+    return this._colsInTbl * ((St - this._curFirstOfRange.getTime()) / this._numTicksInRange);
+    /*switch(this._viewType) {
       case "month":
         return this._colsInTbl * ((St - this._curFirstOfMonth.getTime()) / this._numTicksInRange);
         break;
       case "week":
         return this._colsInTbl * ((St - this._curFirstOfWeek.getTime()) / this._numTicksInRange);
-    }
+    }*/
 
   }
 
@@ -472,14 +478,11 @@ class Canvastimeline {
   }
 
   loadAndDrawEvents(events) {
-    const st = performance.now();
     this.loadEvents(events);
     this.setSizesAndPositionsBeforeRedraw();
     this.drawDayLines();
     this.drawResources();
     this.drawEvents();
-    const ed = Math.round((performance.now() - st) * 1000);
-    console.log("Load and draw Events: "  + (ed / 1000000 ) + "s");
   }
 
   removeEvent(ev) {
@@ -737,18 +740,8 @@ class Canvastimeline {
   }
 
   drawDayLines() {
-    let curDay;
-    switch (this._viewType) {
-      case "month":
-        curDay = this._curFirstOfMonth.getDay();
-        break;
-      case "week":
-        curDay = this._curFirstOfWeek.getDay();
-        break;
-      default:
-        throw new Error("View Type is not set correctly!");
-    }
-    let weekDate = new Date(this._curFirstOfWeek);
+    let curDay = this._curFirstOfRange.getDay();
+    let weekDate = new Date(this._curFirstOfRange);
     weekDate.setDate(weekDate.getDate() - 1);
     this._backgroundCtx.lineWidth = 1;
     this._backgroundCtx.translate(0.5, 0.5)
@@ -759,13 +752,9 @@ class Canvastimeline {
       weekDate.setDate(weekDate.getDate() + 1);
       this._backgroundCtx.moveTo(i * this._cellWidth, 0);
       this._backgroundCtx.lineTo(i * this._cellWidth, this._bgHeight);
-      this._headerLayerCtx.fillText(this._viewType === "month" ? (i + 1) : weekDate.getDate(), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[i] / 2, 4);
-      this._headerLayerCtx.fillText(this._days[curDay], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[curDay] / 2, 16);
-      if (curDay < 6) {
-        curDay++;
-      } else {
-        curDay = 0;
-      }
+      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 4);
+      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 16);
+
     }
     this._resources.forEach((value, key, map) => {
       this._backgroundCtx.moveTo(0, value.yPos);

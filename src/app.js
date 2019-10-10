@@ -215,6 +215,20 @@ window.onload = function () {
           color: "yellow",
           background: "black"
         });
+        setTimeout(function() {
+          f.setViewType("year");
+          f.setCellWidth(30);
+          f.setRangeStartDate(new Date(2020, 0, 2));
+          f.addEvent({
+            id: 115,
+            name: "Olaf inserted",
+            resource_id: 8,
+            start: "2020-01-04 13:45:00",
+            end: "2020-01-08 11:00:00",
+            color: "white",
+            background: "green"
+          })
+        }, 2000)
       }, 1000);
       f.hideLoader();
       }, 1200);
