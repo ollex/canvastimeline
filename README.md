@@ -36,5 +36,5 @@ Placing performance.now() on my laptop which should be some mid-range equipment 
 This is probably good enough for most business apps, seems like canvas is a good option for small to medium amount of resource columns and no extra-wide/high cells. The browser memory after that app.js run is at something around 50MB in Chrome.
 
 # Compatibility
-I tested this in Chrome, Firefox and Edge on Windows, due to the use of class syntactic sugar instead of direct use of function and prototype this does not work in our friend IE.
-Don't have Safari but should work. To make this work with IE I suppose Babel should to the trick.
+I tested this in Chrome, Firefox and Edge on Windows, due to the use of class syntactic sugar instead of direct use of function and prototype plus position sticky this does not work in our friend IE.
+Don't have Safari but should work. 
