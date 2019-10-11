@@ -4,6 +4,8 @@ window.onload = function () {
 
   f.initCalendar({
 	  viewType: "week",
+    monthNames: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
+    dayNames: ["So","Mo","Di","Mi","Do","Fr","Sa"],
     start: new Date(2019, 9, 9),
     onEventFound: function(ev) {
       alert(JSON.stringify(ev, null, 4));

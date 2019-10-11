@@ -795,6 +795,12 @@ class Canvastimeline {
       this._scheduler.style.height = "100vH";
       document.body.style.margin = "0";
     }
+    if(obj.hasOwnProperty("dayNames")) {
+      this._days = obj.dayNames;
+    }
+    if(obj.hasOwnProperty("monthNames")) {
+      this._months = obj.monthNames;
+    }
     if(obj.hasOwnProperty("viewType")) {
       if(obj.viewType === "month" || obj.viewType === "week") {
         this.setViewType(obj.viewType);
