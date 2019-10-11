@@ -797,9 +797,15 @@ class Canvastimeline {
     }
     if(obj.hasOwnProperty("dayNames")) {
       this._days = obj.dayNames;
+      this._days.forEach((d, idx) => {
+        this._dayWidths[idx] = this._backgroundCtx.measureText(d).width;
+      });
     }
     if(obj.hasOwnProperty("monthNames")) {
       this._months = obj.monthNames;
+      this._months.forEach((m, idx) => {
+        this._monthWidths[idx] = this._backgroundCtx.measureText(m).width;
+      });
     }
     if(obj.hasOwnProperty("viewType")) {
       if(obj.viewType === "month" || obj.viewType === "week") {
