@@ -659,14 +659,12 @@ class Canvastimeline {
     });
     const getMax = (array) => {
       if (array.length == 0) return false;
-      array.sort(function (a, b) {
-        if (a.end < b.end)
-          return 1;
-        if (a.end > b.end)
-          return -1;
-        return 0;
+      // this should be faster than sorting?
+      let max = "0000-00-00 00:00:00";
+      array.forEach(function(item) {
+        if(item.end > max) max = item.end;
       });
-      return array[0].end;
+      return max;
     };
     let retval = [];
     let z = 0;
