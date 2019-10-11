@@ -280,7 +280,7 @@ class Canvastimeline {
     this._scheduler.style.maxWidth = this._colsInTbl + 'px';
   }
 
-  // for monday...
+  // for mondays only at the moment...
   calcMonday(d) {
     const currentWeekDay = d.getDay();
     let wkStart = new Date(new Date(d).setDate(d.getDate() - (currentWeekDay == 0 ? 6 : currentWeekDay -1)));
@@ -345,7 +345,6 @@ class Canvastimeline {
     }
   }
 
-  // to do!!! refactor to have multiple firstOf variables to be _curFirstOfRange only always
   setRangeStartDate(d) {
     switch (this._viewType) {
       case "month":
@@ -390,9 +389,11 @@ class Canvastimeline {
     let failureArray = [], maximum_resource_height = this._cellHeight;
     try {
       for (let ev of arrayOfEventObjects) {
-        // think about storing the Date on the event not only the initial strings
-        // for performance reasons as comparing the Date (a number) with the visible range
-        // could be faster like that?
+        /*
+         * think about storing the Date on the event not only the initial strings
+         * for performance reasons as comparing the Date (a number) with the visible range
+         * could be faster like that?
+        * */
         let startDate = this.parseDate(ev.start);
         let endDate = this.parseDate(ev.end);
         ev.minx = this.getXPos(startDate.getTime());
@@ -408,7 +409,7 @@ class Canvastimeline {
       console.log(err);
       throw new Error("Event Object Array does not match signature!");
     }
-    // make the yPos values for each event match in case of overlaps
+    // adjust yPos values in case of overlaps
     let prevY = 0;
     this._resources.forEach((value, key, map) => {
       if (value.events.length) {
@@ -418,7 +419,6 @@ class Canvastimeline {
         let maxHeightFactor = 0;
         let maxWidthOfEvent = 0;
         possibleMultiArray.forEach((ar) => {
-          let helper = [];
           ar.sort(function (a, b) {
             if (a.start < b.start)
               return -1;
@@ -427,7 +427,6 @@ class Canvastimeline {
             return 0;
           });
 
-          let cnt = ar.length;
           const isConflict = (x, w, lvl, id) => {
             const l = value.events.length;
             let e;
@@ -601,11 +600,8 @@ class Canvastimeline {
     const y = ev.clientY - rect.top;
     let startIdx = y / this._maxCellHeight - 1;
     let endIdx = this._resources.size - 1;
-    //this.findEventByXY(x, y, minIdx, this._resources.size - 1);
     // don't bother if no one is interested...
     if (!this._onEventFound) return;
-    //startIdx = parseInt(startIdx) - 1;
-    //endIdx = parseInt(endIdx);
     if (startIdx < 0) startIdx = 0;
     let ref;
     // binary search for events coming but it's more tricky as it's a range
@@ -751,7 +747,6 @@ class Canvastimeline {
       this._headerLayerCtx.fillText(weekDate.getDate().toString(10), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 19);
       this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 31);
     }
-    // draw headers according to view
     let z;
     switch(this._viewType) {
       case "year":
