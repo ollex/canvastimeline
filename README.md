@@ -23,6 +23,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 + the events will be packed to some extend but never overlap, so the cell heights keep at a minimum but events are always visible
 + changing a month empties the events which are at the moment internally attached to resources
 + a configurable click handler (deliver your callback with initial config object) is attached to the event layer canvas and finds the event clicked (or no event when the click was not where an event is)
++ configure "internationalize" day names and month names
 
 ![alt text](./src/images/canvastimeline.gif)
 
