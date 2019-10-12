@@ -419,13 +419,15 @@ class Canvastimeline {
         let maxHeightFactor = 0;
         let maxWidthOfEvent = 0;
         possibleMultiArray.forEach((ar) => {
+          /*
+          the events come back sorted by start date anyway!
           ar.sort(function (a, b) {
             if (a.start < b.start)
               return -1;
             if (a.start > b.start)
               return 1;
             return 0;
-          });
+          });*/
 
           const isConflict = (x, w, lvl, id) => {
             const l = value.events.length;
@@ -511,13 +513,13 @@ class Canvastimeline {
     let maxHeightF = 0;
     let maxWidthOfEvent = 0;
     possibleMultiArray.forEach((ar) => {
-      ar.sort(function (a, b) {
+      /*ar.sort(function (a, b) {
         if (a.start < b.start)
           return -1;
         if (a.start > b.start)
           return 1;
         return 0;
-      });
+      });*/
 
       const isConflict = (x, w, lvl, id) => {
         const l = ref.events.length;
