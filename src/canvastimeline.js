@@ -42,6 +42,7 @@ class Canvastimeline {
 		}`);
 
       style.insertRule(`.canvastl_side_canvas {
+      position: -webkit-sticky;
 			position: sticky;
 			left: 0;
 			margin: 0;
@@ -54,6 +55,7 @@ class Canvastimeline {
 		}`);
 
       style.insertRule(`.canvastl_top_canvas {
+			position: -webkit-sticky;
 			position: sticky;
 			top: 0;
 			background: rgb(255, 255, 255);
