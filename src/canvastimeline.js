@@ -670,7 +670,7 @@ class Canvastimeline {
 
   setSizesAndPositionsBeforeRedraw() {
     this._resLayer.width = this._resHeaderLayer.width = this._resColWidth;
-    this._resLayer.height = this._eventLayer.height = this._background.height = this._bgHeight; //cell_height * _resources.size;
+    this._resLayer.height = this._eventLayer.height = this._background.height = this._bgHeight;
     this._eventLayer.width = this._background.width = this._colsInTbl;
     this._headerLayer.width = this._colsInTbl + this._resColWidth;
     this._eventLayer.style.left = this._background.style.left = this._resColWidth + 'px';
@@ -682,12 +682,10 @@ class Canvastimeline {
   }
 
   drawResources() {
-
     this._helpArray.forEach((obj) => {
       this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._cellHeight / 2, obj.width - 2);
     });
 
-    this._resHeaderLayerCtx.stroke();
     this._resLayerCtx.fillStyle = "#333";
     this._resLayerCtx.textBaseline = "top";
     this._resLayerCtx.lineWidth = 1;
@@ -700,21 +698,21 @@ class Canvastimeline {
         this._resLayerCtx.lineTo(obj.posX, this._resLayer.height);
       }
     });
-    this._resHeaderLayerCtx.translate(-0.5, -0.5);
 
     this._resources.forEach((value, key, map) => {
       this._helpArray.forEach((obj) => {
-        this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos, obj.width - 2);
+        this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos + 2, obj.width - 2);
       });
+
       this._resLayerCtx.moveTo(0, value.yPos);
       this._resLayerCtx.lineTo(this._resColWidth, value.yPos);
     });
 
     this._resLayerCtx.stroke();
+    this._resLayerCtx.translate(-0.5, -0.5);
   }
 
   drawDayLines() {
-    let curDay = this._curFirstOfRange.getDay();
     let weekDate = new Date(this._curFirstOfRange);
     weekDate.setDate(weekDate.getDate() - 1);
     this._backgroundCtx.lineWidth = 1;
@@ -755,7 +753,7 @@ class Canvastimeline {
     this._resources.forEach((value, key, map) => {
       this._backgroundCtx.moveTo(0, value.yPos);
       this._backgroundCtx.lineTo(this._colsInTbl, value.yPos);
-    })
+    });
     this._backgroundCtx.translate(-0.5, -0.5);
     this._backgroundCtx.stroke();
     this._headerLayerCtx.stroke();

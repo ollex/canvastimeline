@@ -35,7 +35,11 @@ For number of resources - if you stay below 200 (with few overlapping events) wi
 # Performance - just very quick and dirty
 Placing performance.now() on my laptop which should be some mid-range equipment (i7 5500 dual core, NVDIA Geforce 920M) for example comes back after 18 - 20ms (Chrome) and about 76ms (Firefox) for the app.js example last loadAndDrawEvents call with 700 (many overlapping) events in the year view.
 This is probably good enough for most business apps, seems like canvas is a good option for small to medium amount of resource columns and no extra-wide/high cells. The browser memory after that app.js run is at something around 50MB in Chrome.
+See below though if you need ALL browsers displaying everything perfectly some work needs to be done to get rid of weird behaviors in some browsers (like always?)
 
 # Compatibility
 I tested this in Chrome, Firefox and Edge on Windows, due to the use of class syntactic sugar instead of direct use of function and prototype plus position sticky this does not work in our friend IE.
-Don't have Safari but should work. 
+Chrome and FF display everything perfectly, Edge has a weird issue - some of the cell bounding lines seem not to be wiped out when repainting (only for some of the upper resources though) cells that are higher than just 1 line.
+Neither clearRect() helps on the background canvas nor resizing like it should.
+
+ 

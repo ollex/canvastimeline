@@ -233,9 +233,7 @@ window.onload = function () {
               end: "2020-0" + y + "-0"+x + " 11:00:00"
             });
           }
-          let st = performance.now();
           f.loadAndDrawEvents(evts);
-          console.log((performance.now() - st) + 'ms');
         }, 2000)
       }, 1000);
       f.hideLoader();
