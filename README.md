@@ -39,7 +39,6 @@ See below though if you need ALL browsers displaying everything perfectly some w
 
 # Compatibility
 I tested this in Chrome, Firefox and Edge on Windows, due to the use of class syntactic sugar instead of direct use of function and prototype plus position sticky this does not work in our friend IE.
-Chrome and FF display everything perfectly, Edge has a weird issue - some of the cell bounding lines seem not to be wiped out when repainting (only for some of the upper resources though) cells that are higher than just 1 line.
-Neither clearRect() helps on the background canvas nor resizing like it should.
+
 
  

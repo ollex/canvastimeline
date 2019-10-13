@@ -698,7 +698,7 @@ class Canvastimeline {
         this._resLayerCtx.lineTo(obj.posX, this._resLayer.height);
       }
     });
-
+    this._resLayerCtx.beginPath();
     this._resources.forEach((value, key, map) => {
       this._helpArray.forEach((obj) => {
         this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos + 2, obj.width - 2);
@@ -720,6 +720,7 @@ class Canvastimeline {
     this._backgroundCtx.strokeStyle = "#eee";
     this._headerLayerCtx.textBaseline = "top";
     this._headerLayerCtx.fillStyle = '#333';
+    this._backgroundCtx.beginPath();
     for (let i = 0; i < this._daysInRange; i++) {
       weekDate.setDate(weekDate.getDate() + 1);
       this._backgroundCtx.moveTo(i * this._cellWidth, 0);
