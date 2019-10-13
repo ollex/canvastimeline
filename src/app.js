@@ -234,6 +234,7 @@ window.onload = function () {
             });
           }
           f.loadAndDrawEvents(evts);
+          f.showMarkerAtDate(new Date(2020, 0, 12, 0, 0, 0), new Date(2020, 0, 13, 12));
         }, 2000)
       }, 1000);
       f.hideLoader();

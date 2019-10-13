@@ -9,6 +9,15 @@ class Canvastimeline {
       sle.appendChild(document.createTextNode(""));
       document.head.appendChild(sle);
       const style = sle.sheet;
+
+      style.insertRule(`.canvastl_marker {position: absolute;
+      left: -100px;
+      top: 0px;
+      height: 500px;
+      width: 30px;
+      background: rgb(128, 128, 12, 0.5);
+      z-index: 10;}`);
+
       style.insertRule(`.canvastl_scheduler_wrapper {
 			position: relative;
 			width: 100%;
@@ -112,6 +121,8 @@ class Canvastimeline {
     this._schedulerWrapper.height = this._view.height;
     this._schedulerWrapper.width = this._view.width;
     this._schedulerWrapper.className = "canvastl_scheduler_wrapper";
+    this._marker = document.createElement("div");
+    this._marker.className = "canvastl_marker";
     this._loader = document.createElement("div");
     this._loader.className = "canvastimeline-loader";
     this._scheduler = document.createElement("div");
@@ -150,6 +161,7 @@ class Canvastimeline {
     this._scheduler.appendChild(this._resLayer);
     this._scheduler.appendChild(this._background);
     this._scheduler.appendChild(this._eventLayer);
+    this._scheduler.appendChild(this._marker);
     this._schedulerWrapper.appendChild(this._scheduler);
     this._view.appendChild(this._schedulerWrapper);
     this._resources = [];
@@ -229,6 +241,17 @@ class Canvastimeline {
       this._resources.set(r.id, r);
       this._resourcesIdx.set(idx, r.id);
     });
+  }
+
+  showMarkerAtDate(startDate, endDate) {
+    this._marker.style.left = this.getXPos(startDate.getTime()) + this._resColWidth + "px";
+    this._marker.style.width = this.getWidth(startDate.getTime(), endDate.getTime()) + "px";
+    this._marker.style.height = this._bgHeight + this._resHeaderLayer.height + "px";
+  }
+
+  hideMarker() {
+    this._marker.style.width = "30px";
+    this._marker.style.left = "-100px";
   }
 
   removeEventsAndResetResourceGeometry() {
