@@ -16,25 +16,26 @@ class Canvastimeline {
       height: 500px;
       width: 30px;
       background: rgb(128, 128, 12, 0.5);
-      z-index: 10;}`);
+      z-index: 3;}`);
 
       style.insertRule(`.canvastl_scheduler_wrapper {
 			position: relative;
 			width: 100%;
 			height: 100%;
-			border: 1px solid #eee;
 			box-sizing: border-box;
 		}`);
 
       style.insertRule(`.canvastl_scheduler {
+			width: 100%;
 			max-width: 1890px;
 			height: 600px;
 			overflow: auto;
+			border: 1px solid #eee;
+			box-sizing: border-box;
 			position: relative;
 		}`);
 
-      style.insertRule(`.canvastl_level_0,
-		.canvastl_level_1 {
+      style.insertRule(`.canvastl_level_0, .canvastl_level_1 {
 			position: absolute;
 			left: 30px;
 			top: 45px;
@@ -72,6 +73,7 @@ class Canvastimeline {
 			background: #ffffff;
 			border-bottom: 1px solid #eee;
 			border-right: 3px solid #eee;
+			border-left: 1px solid #eee;
 		}`);
       style.insertRule(`.canvastimeline-loader {
         position: absolute;
@@ -103,7 +105,7 @@ class Canvastimeline {
 
     this._viewType = "month";
     this._cellHeight = 30;
-    this._cellWidth = 180;
+    this._cellWidth = 160;
     this._numResources = 1;
     this._daysInRange = 31;
     this._colsInTbl = this._daysInRange * this._cellWidth;
@@ -300,7 +302,7 @@ class Canvastimeline {
 
     this._numTicksInRange = 86400 * this._daysInRange * 1000;
     this._colsInTbl = this._daysInRange * this._cellWidth;
-    this._scheduler.style.maxWidth = this._colsInTbl + 'px';
+    this._scheduler.style.maxWidth = this._colsInTbl + this._resColWidth + 'px';
   }
 
   // for mondays only at the moment...
@@ -705,6 +707,7 @@ class Canvastimeline {
   }
 
   drawResources() {
+    this._resHeaderLayerCtx.beginPath();
     this._helpArray.forEach((obj) => {
       this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._cellHeight / 2, obj.width - 2);
     });
@@ -714,14 +717,15 @@ class Canvastimeline {
     this._resLayerCtx.lineWidth = 1;
     this._resLayerCtx.strokeStyle = '#eee';
     this._resLayerCtx.translate(0.5, 0.5);
-
+    this._resLayerCtx.beginPath();
     this._helpArray.forEach((obj, idx) => {
       if (idx) {
         this._resLayerCtx.moveTo(obj.posX, 0);
         this._resLayerCtx.lineTo(obj.posX, this._resLayer.height);
       }
     });
-    this._resLayerCtx.beginPath();
+    this._resHeaderLayerCtx.stroke();
+
     this._resources.forEach((value, key, map) => {
       this._helpArray.forEach((obj) => {
         this._resLayerCtx.fillText(value[obj.name], obj.posX, value.yPos + 2, obj.width - 2);
