@@ -73,9 +73,8 @@ class Canvastimeline {
 			top: 0;
 			z-index: 6;
 			background: #ffffff;
-			border-bottom: 1px solid #eee;
+			border: 1px solid #eee;
 			border-right: 3px solid #eee;
-			border-left: 1px solid #eee;
 		}`);
       style.insertRule(`.canvastimeline-loader {
         position: absolute;
@@ -106,7 +105,7 @@ class Canvastimeline {
     }
 
     this._viewType = "month";
-    this._cellHeight = 30;
+    this._cellHeight = 16;
     this._cellWidth = 160;
     this._numResources = 1;
     this._daysInRange = 31;
@@ -176,6 +175,9 @@ class Canvastimeline {
     this._helpArray = [];
     this._maxCellHeight = this._cellHeight;
     this._onEventFound = null;
+    this._onEventGetText = function(ev) {
+      return ev.name;
+    };
 
     this._backgroundCtx.font = "12px Arial";
     for (let i = 1; i < 32; i++) {
@@ -645,7 +647,7 @@ class Canvastimeline {
         this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
         this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
         this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
-        this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
+        this._eventLayerCtx.fillText(this._onEventGetText(ev), (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
       });
     } else {
       this._resources.forEach((r) => {
@@ -653,7 +655,7 @@ class Canvastimeline {
           this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
           this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
           this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
-          this._eventLayerCtx.fillText(ev.name, (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
+          this._eventLayerCtx.fillText(this._onEventGetText(ev), (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
         });
       });
     }
@@ -711,7 +713,7 @@ class Canvastimeline {
   drawResources() {
     this._resHeaderLayerCtx.beginPath();
     this._helpArray.forEach((obj) => {
-      this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._cellHeight / 2, obj.width - 2);
+      this._resHeaderLayerCtx.fillText(obj.name, obj.posX + 2, this._resHeaderLayer.height - 6, obj.width - 2);
     });
 
     this._resLayerCtx.fillStyle = "#333";
@@ -799,6 +801,11 @@ class Canvastimeline {
     if (obj.hasOwnProperty("onEventFound")) {
       if (typeof obj.onEventFound === "function") {
         this._onEventFound = obj.onEventFound;
+      }
+    }
+    if (obj.hasOwnProperty("onEventGetText")) {
+      if (typeof obj.onEventGetText === "function") {
+        this._onEventGetText = obj.onEventGetText;
       }
     }
     if (obj.hasOwnProperty("inFrame")) {
