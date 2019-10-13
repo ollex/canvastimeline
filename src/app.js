@@ -4,8 +4,8 @@ window.onload = function () {
 
   f.initCalendar({
 	  viewType: "week",
-    onEventGetText: function(ev) {
-	    return ev.name + ' ' + ev.start.substr(9);
+    getEventText: function(ev) {
+	    return ev.name + ' ' + ev.start.substr(10);
     },
     monthNames: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
     dayNames: ["So","Mo","Di","Mi","Do","Fr","Sa"],

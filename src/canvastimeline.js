@@ -175,7 +175,7 @@ class Canvastimeline {
     this._helpArray = [];
     this._maxCellHeight = this._cellHeight;
     this._onEventFound = null;
-    this._onEventGetText = function(ev) {
+    this._getEventText = function(ev) {
       return ev.name;
     };
 
@@ -647,7 +647,7 @@ class Canvastimeline {
         this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
         this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
         this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
-        this._eventLayerCtx.fillText(this._onEventGetText(ev), (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
+        this._eventLayerCtx.fillText(this._getEventText(ev), (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
       });
     } else {
       this._resources.forEach((r) => {
@@ -655,7 +655,7 @@ class Canvastimeline {
           this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
           this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
           this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
-          this._eventLayerCtx.fillText(this._onEventGetText(ev), (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
+          this._eventLayerCtx.fillText(this._getEventText(ev), (ev.minx < 0 ? 4 : ev.minx + 4), ev.miny + 10, ev.width - 6);
         });
       });
     }
@@ -803,9 +803,9 @@ class Canvastimeline {
         this._onEventFound = obj.onEventFound;
       }
     }
-    if (obj.hasOwnProperty("onEventGetText")) {
-      if (typeof obj.onEventGetText === "function") {
-        this._onEventGetText = obj.onEventGetText;
+    if (obj.hasOwnProperty("getEventText")) {
+      if (typeof obj.getEventText === "function") {
+        this._getEventText = obj.getEventText;
       }
     }
     if (obj.hasOwnProperty("inFrame")) {
