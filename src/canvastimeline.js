@@ -174,7 +174,8 @@ class Canvastimeline {
     this._sidecols = new Map();
     this._helpArray = [];
     this._maxCellHeight = this._cellHeight;
-    this._onEventFound = null;
+    this._onEventLayerClick = null;
+    this._onContextMenu = null;
     this._getEventText = function(ev) {
       return ev.name;
     };
@@ -190,7 +191,8 @@ class Canvastimeline {
       this._monthWidths[idx] = this._backgroundCtx.measureText(m).width;
     });
 
-    this._eventLayer.onclick = this.findEventByXY.bind(this);
+    this._eventLayer.onclick = this.clickHandler.bind(this);
+    this._eventLayer.oncontextmenu = this.contextMenu.bind(this);
   }
 
 
@@ -607,14 +609,28 @@ class Canvastimeline {
     }
   }
 
-  findEventByXY(ev) {
+  clickHandler(ev) {
+    if(this._onEventLayerClick) {
+      this.findEventByXY(ev, this._onEventLayerClick);
+    }
+  }
+
+  contextMenu(ev) {
+    ev.preventDefault();
+    if(this._onContextMenu) {
+      this.findEventByXY(ev, this._onContextMenu);
+    } else {
+      console.log("context clicked")
+    }
+  }
+
+  findEventByXY(ev, cb) {
     const rect = ev.target.getBoundingClientRect();
     const x = ev.clientX - rect.left; //x position within the element.
     const y = ev.clientY - rect.top;
     let startIdx = y / this._maxCellHeight - 1;
     let endIdx = this._resources.size - 1;
     // don't bother if no one is interested...
-    if (!this._onEventFound) return;
     if (startIdx < 0) startIdx = 0;
     let ref;
     // binary search for events coming but it's more tricky as it's a range
@@ -628,7 +644,7 @@ class Canvastimeline {
         for (let i = 0; i < l; i++) {
           ev = ref.events[i];
           if ((ev.minx <= x && ev.minx + ev.width >= x) && (ev.miny <= y && ev.miny + this._cellHeight - 1 >= y)) {
-            return this._onEventFound(ev, ref.id);
+            return cb(ev, ref.id);
           }
         }
         return;
@@ -798,9 +814,14 @@ class Canvastimeline {
     if (obj.hasOwnProperty("sidecols")) {
       this.sidecols = obj.sidecols;
     }
-    if (obj.hasOwnProperty("onEventFound")) {
-      if (typeof obj.onEventFound === "function") {
-        this._onEventFound = obj.onEventFound;
+    if (obj.hasOwnProperty("onEventLayerClick")) {
+      if (typeof obj.onEventLayerClick === "function") {
+        this._onEventLayerClick = obj.onEventLayerClick;
+      }
+    }
+    if (obj.hasOwnProperty("onContextMenu")) {
+      if(typeof obj.onContextMenu === "function") {
+        this._onContextMenu = obj.onContextMenu;
       }
     }
     if (obj.hasOwnProperty("getEventText")) {

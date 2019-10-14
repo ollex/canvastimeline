@@ -10,8 +10,11 @@ window.onload = function () {
     monthNames: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
     dayNames: ["So","Mo","Di","Mi","Do","Fr","Sa"],
     start: new Date(2019, 9, 9),
-    onEventFound: function(ev) {
+    onEventLayerClick: function(ev, resource_id) {
       alert(JSON.stringify(ev, null, 4));
+    },
+    onContextMenu: function(ev, resource_id) {
+	    console.log("context menu clicked." + ev ? ev : " no event at mouse position.");
     },
     resources: [{
       id: 1,
