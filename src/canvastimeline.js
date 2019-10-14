@@ -106,9 +106,10 @@ class Canvastimeline {
 
     this._viewType = "month";
     this._cellHeight = 16;
-    this._cellWidth = 160;
+    this._cellWidth = 40;
     this._numResources = 1;
     this._daysInRange = 31;
+    this._granularity = 1;
     this._colsInTbl = this._daysInRange * this._cellWidth;
     this._rowsInTbl = this._numResources * this._cellHeight;
     this._days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -290,6 +291,7 @@ class Canvastimeline {
   calcTicksAndWidth() {
     switch (this._viewType) {
       case "year":
+        this._granularity = 1;
         const year = this._curFirstOfRange.getFullYear();
         if(year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
           this._daysInRange = 366;
@@ -298,17 +300,26 @@ class Canvastimeline {
         }
         break;
       case "month":
+        this._granularity = 1;
         this._daysInRange = new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 1, 0).getDate();
         break;
       case "week":
         this._daysInRange = 7;
+        break;
+      case "week-hours":
+        this._daysInRange = 7;
+        this._granularity = 24;
+        break;
+      case "week-12hours":
+        this._daysInRange = 7;
+        this._granularity = 2;
         break;
       default:
         throw new Error("View Type is not set correctly!");
     }
 
     this._numTicksInRange = 86400 * this._daysInRange * 1000;
-    this._colsInTbl = this._daysInRange * this._cellWidth;
+    this._colsInTbl = this._daysInRange * this._cellWidth * this._granularity;
     this._scheduler.style.maxWidth = this._colsInTbl + this._resColWidth + 'px';
   }
 
@@ -368,10 +379,19 @@ class Canvastimeline {
   setViewType(typeStr) {
     if(typeStr === 'week') {
       this._viewType = 'week';
+      this._granularity = 1;
     } else if(typeStr === 'month') {
       this._viewType = 'month';
+      this._granularity = 1;
     } else if(typeStr === 'year') {
       this._viewType = 'year';
+      this._granularity = 1;
+    } else if(typeStr === 'week-hours') {
+      this._viewType = 'week-hours';
+      this._granularity = 24;
+    } else if(typeStr === 'week-12hours') {
+      this._viewType = 'week-12hours';
+      this._granularity = 2;
     } else {
       throw new Error("View Type must be either week or month!");
     }
@@ -393,6 +413,8 @@ class Canvastimeline {
         this._curFirstOfRange = new Date(d.getFullYear(), 0, 1);
         break;
       case "week":
+      case "week-hours":
+      case "week-12hours":
         this._curFirstOfRange = this.calcMonday(d);
     }
     this.prepareRange();
@@ -767,12 +789,24 @@ class Canvastimeline {
     this._headerLayerCtx.textBaseline = "top";
     this._headerLayerCtx.fillStyle = '#333';
     this._backgroundCtx.beginPath();
+    let curX;
     for (let i = 0; i < this._daysInRange; i++) {
       weekDate.setDate(weekDate.getDate() + 1);
-      this._backgroundCtx.moveTo(i * this._cellWidth, 0);
-      this._backgroundCtx.lineTo(i * this._cellWidth, this._bgHeight);
-      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 19);
-      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._cellWidth + (this._cellWidth / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 31);
+      curX = i * this._granularity * this._cellWidth;
+      this._headerLayerCtx.fillStyle = (i % 2 === 0) ? "#f9f9f9" : "#fdfdfd";
+      this._headerLayerCtx.fillRect(i * this._granularity * this._cellWidth + this._resColWidth, 0, this._granularity * this._cellWidth, this._resHeaderLayer.height);
+      this._headerLayerCtx.fillStyle = "#333";
+      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), (i * this._granularity  * this._cellWidth) + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 14);
+      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._granularity  * this._cellWidth + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 25);
+      for(let k = 0; k < this._granularity; k++) {
+        this._backgroundCtx.moveTo(curX + (k * this._cellWidth), 0);
+        this._backgroundCtx.lineTo(curX + (k * this._cellWidth), this._bgHeight);
+        // if we want hours (granularity > 1)
+        if(this._granularity > 1) {
+          this._headerLayerCtx.fillText((24 / this._granularity * k).toString(10), curX + (k * this._cellWidth) + this._resColWidth - this._resHeaderLayerCtx.measureText((24 / this._granularity * k).toString(10)).width / 2, 35);
+        }
+      }
+
     }
     let z;
     switch(this._viewType) {
@@ -781,19 +815,21 @@ class Canvastimeline {
         for(let i = 0; i < 12; i++) {
           curDaysInMonth = new Date(this._curFirstOfRange.getFullYear(), i + 1, 0).getDate();
           sumOfDays += curDaysInMonth;
-          this._headerLayerCtx.fillText(this._months[i], sumOfDays * this._cellWidth - (curDaysInMonth / 2 * this._cellWidth) + this._resColWidth - this._monthWidths[i], 2);
+          this._headerLayerCtx.fillText(this._months[i], sumOfDays * this._cellWidth - (curDaysInMonth / 2 * this._cellWidth) + this._resColWidth - this._monthWidths[i] / 2, 2);
         }
         break;
       case "month":
         z = this._curFirstOfRange.getMonth();
-        this._headerLayerCtx.fillText(this._months[z], this._daysInRange / 2 * this._cellWidth + this._resColWidth - this._monthWidths[z], 2);
+        this._headerLayerCtx.fillText(this._months[z], this._colsInTbl / 2 + this._resColWidth - this._monthWidths[z] / 2, 2);
         break;
       case "week":
+      case "week-hours":
+      case "week-12hours":
         z = new Date(this._curFirstOfRange);
         z.setDate(z.getDate() + 6);
         const nameStr = this._curFirstOfRange.toLocaleDateString() + ' - ' + z.toLocaleDateString();
         const w = this._headerLayerCtx.measureText(nameStr);
-        this._headerLayerCtx.fillText(nameStr, this._daysInRange / 2 * this._cellWidth + this._resColWidth - w.width, 2);
+        this._headerLayerCtx.fillText(nameStr, (this._colsInTbl / 2) + this._resColWidth - (w.width / 2), 2);
         break;
       default:
     }
@@ -845,8 +881,9 @@ class Canvastimeline {
       });
     }
     if(obj.hasOwnProperty("viewType")) {
-      if(obj.viewType === "month" || obj.viewType === "week") {
+      if(["month","week","year","week-hours","week-12hours"].indexOf(obj.viewType) !== -1) {
         this.setViewType(obj.viewType);
+        console.log(obj.viewType);
       } else {
         throw new Error("View Type must be month or week!");
       }

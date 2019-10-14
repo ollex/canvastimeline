@@ -3,7 +3,7 @@ window.onload = function () {
   const f = new Canvastimeline(document.getElementById("timeline"));
 
   f.initCalendar({
-	  viewType: "week",
+	  viewType: "week-hours",
     getEventText: function(ev) {
 	    return ev.name + ' ' + ev.start.substr(10);
     },
