@@ -198,6 +198,7 @@ class Canvastimeline {
 
   destroy(removeParent) {
     this._eventLayer.removeEventListener("click", this.findEventByXY);
+    this._eventLayer.removeEventListener("contextmenu", this.contextMenu);
     while (this._view.firstChild) {
       this._view.removeChild(this._view.firstChild);
     }
@@ -619,8 +620,6 @@ class Canvastimeline {
     ev.preventDefault();
     if(this._onContextMenu) {
       this.findEventByXY(ev, this._onContextMenu);
-    } else {
-      console.log("context clicked")
     }
   }
 
