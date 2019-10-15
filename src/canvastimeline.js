@@ -38,7 +38,7 @@ class Canvastimeline {
       style.insertRule(`.canvastl_level_0, .canvastl_level_1 {
 			position: absolute;
 			left: 30px;
-			top: 45px;
+			top: 50px;
 		}`);
 
       style.insertRule(`.canvastl_side_canvas {
@@ -149,11 +149,11 @@ class Canvastimeline {
     this._headerLayer = document.createElement("canvas");
     this._headerLayer.className = "canvastl_top_canvas";
     this._headerLayer.width = 1890;
-    this._headerLayer.height = 45;
+    this._headerLayer.height = 50;
     this._resHeaderLayer = document.createElement("canvas");
     this._resHeaderLayer.className = "canvastl_res_header";
     this._resHeaderLayer.width = 30;
-    this._resHeaderLayer.height = 45;
+    this._resHeaderLayer.height = 50;
     this._backgroundCtx = this._background.getContext("2d");
     this._eventLayerCtx = this._eventLayer.getContext("2d");
     this._resLayerCtx = this._resLayer.getContext("2d");
