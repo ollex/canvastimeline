@@ -393,7 +393,7 @@ class Canvastimeline {
       this._viewType = 'week-12hours';
       this._granularity = 2;
     } else {
-      throw new Error("View Type must be either week or month!");
+      throw new Error("View Type invalid!");
     }
   }
 
@@ -651,7 +651,6 @@ class Canvastimeline {
     const y = ev.clientY - rect.top;
     let startIdx = y / this._maxCellHeight - 1;
     let endIdx = this._resources.size - 1;
-    // don't bother if no one is interested...
     if (startIdx < 0) startIdx = 0;
     let ref;
     // binary search for events coming but it's more tricky as it's a range
