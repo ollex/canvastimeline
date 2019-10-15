@@ -913,7 +913,7 @@ class Canvastimeline {
         this.setViewType(obj.viewType);
         console.log(obj.viewType);
       } else {
-        throw new Error("View Type must be month or week!");
+        throw new Error("View Type unknown!");
       }
     }
 
