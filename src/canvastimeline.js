@@ -305,6 +305,7 @@ class Canvastimeline {
         break;
       case "week":
         this._daysInRange = 7;
+        this._granularity = 1;
         break;
       case "week-hours":
         this._daysInRange = 7;
@@ -313,6 +314,10 @@ class Canvastimeline {
       case "week-12hours":
         this._daysInRange = 7;
         this._granularity = 2;
+        break;
+      case "day":
+        this._daysInRange = 1;
+        this._granularity = 24;
         break;
       default:
         throw new Error("View Type is not set correctly!");
@@ -351,10 +356,15 @@ class Canvastimeline {
         this._curFirstOfRange.setFullYear(this._curFirstOfRange.getFullYear() - 1);
         break;
       case "week":
+      case "week-hours":
+      case "week-12hours":
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() - 7);
         break;
+      case "day":
+        this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() - 1);
+        break;
       default:
-
+        throw new Error("View type is not supported!");
     }
     this.prepareRange()
   }
@@ -368,7 +378,12 @@ class Canvastimeline {
         this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() + 1);
         break;
       case "week":
+      case "week-hours":
+      case "week-12hours":
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() + 7);
+        break;
+      case "day":
+        this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() + 1);
         break;
       default:
         throw new Error("View Type is not set correctly!");
@@ -392,6 +407,9 @@ class Canvastimeline {
     } else if(typeStr === 'week-12hours') {
       this._viewType = 'week-12hours';
       this._granularity = 2;
+    } else if(typeStr === 'day') {
+      this._viewType = 'day';
+      this._granularity = 24;
     } else {
       throw new Error("View Type invalid!");
     }
@@ -416,6 +434,16 @@ class Canvastimeline {
       case "week-hours":
       case "week-12hours":
         this._curFirstOfRange = this.calcMonday(d);
+        break;
+      case "day":
+        d.setHours(0);
+        d.setMinutes(0);
+        d.setSeconds(0);
+        d.setMilliseconds(0);
+        this._curFirstOfRange = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        break;
+      default:
+        throw new Error("View type is not supported!");
     }
     this.prepareRange();
   }
@@ -440,7 +468,7 @@ class Canvastimeline {
   }
 
   loadEvents(arrayOfEventObjects) {
-    let failureArray = [], maximum_resource_height = this._cellHeight;
+    let failureArray = [];
     try {
       for (let ev of arrayOfEventObjects) {
         /*
@@ -688,6 +716,7 @@ class Canvastimeline {
     } else {
       this._resources.forEach((r) => {
         r.events.forEach((ev) => {
+          console.log(ev);
           this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
           this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
           this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
@@ -880,7 +909,7 @@ class Canvastimeline {
       });
     }
     if(obj.hasOwnProperty("viewType")) {
-      if(["month","week","year","week-hours","week-12hours"].indexOf(obj.viewType) !== -1) {
+      if(["month","week","year","week-hours","week-12hours","day"].indexOf(obj.viewType) !== -1) {
         this.setViewType(obj.viewType);
         console.log(obj.viewType);
       } else {

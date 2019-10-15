@@ -3,18 +3,18 @@ window.onload = function () {
   const f = new Canvastimeline(document.getElementById("timeline"));
 
   f.initCalendar({
-	  viewType: "week-hours",
-    getEventText: function(ev) {
-	    return ev.name + ' ' + ev.start.substr(10);
+    viewType: "week-hours",
+    getEventText: function (ev) {
+      return ev.name + ' ' + ev.start.substr(10);
     },
-    monthNames: ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],
-    dayNames: ["So","Mo","Di","Mi","Do","Fr","Sa"],
+    monthNames: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    dayNames: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
     start: new Date(2019, 9, 9),
-    onEventLayerClick: function(ev, resource_id) {
+    onEventLayerClick: function (ev, resource_id) {
       alert(JSON.stringify(ev, null, 4));
     },
-    onContextMenu: function(ev, resource_id) {
-	    console.log("context menu clicked." + ev ? ev : " no event at mouse position.");
+    onContextMenu: function (ev, resource_id) {
+      console.log("context menu clicked." + ev ? ev : " no event at mouse position.");
     },
     resources: [{
       id: 1,
@@ -141,12 +141,12 @@ window.onload = function () {
     start: "2019-10-13 11:45:00",
     end: "2019-10-20 15:00:00"
   }, {
-      id: 4,
-      name: "Ingo",
-      resource_id: 2,
-      start: "2019-10-08 11:30:00",
-      end: "2019-10-12 11:00:00"
-    },
+    id: 4,
+    name: "Ingo",
+    resource_id: 2,
+    start: "2019-10-08 11:30:00",
+    end: "2019-10-12 11:00:00"
+  },
     {
       id: 5,
       name: "Ingo",
@@ -177,10 +177,10 @@ window.onload = function () {
   ];
   f.loadAndDrawEvents(events);
 
- setTimeout(function(){
+  setTimeout(function () {
     f.showLoader();
     f.prevRange();
-    setTimeout(function(){
+    setTimeout(function () {
       f.loadAndDrawEvents([
         {
           id: 111,
@@ -204,7 +204,7 @@ window.onload = function () {
         start: "2019-09-31 13:45:00",
         end: "2019-10-05 11:00:00"
       });
-      setTimeout(function(){
+      setTimeout(function () {
         f.setViewType("month");
         f.setRangeStartDate(new Date(2020, 9, 5));
         f.addEvent({
@@ -223,29 +223,43 @@ window.onload = function () {
           color: "yellow",
           background: "black"
         });
-        setTimeout(function() {
+        setTimeout(function () {
           f.setViewType("year");
           f.setCellWidth(30);
           f.setRangeStartDate(new Date(2020, 0, 2));
           let evts = [], x, y;
-          for(let i = 0; i < 700; i++) {
+          for (let i = 0; i < 700; i++) {
             x = Math.ceil(Math.random() * 7);
             y = x + 1;
             evts.push({
               id: i + 115,
               name: i + '_event',
               resource_id: Math.ceil(Math.random() * 19),
-              start: "2020-0" + x + "-0"+x + " 15:00:00",
-              end: "2020-0" + y + "-0"+x + " 11:00:00"
+              start: "2020-0" + x + "-0" + x + " 15:00:00",
+              end: "2020-0" + y + "-0" + x + " 11:00:00"
             });
           }
           f.loadAndDrawEvents(evts);
           f.showMarkerAtDate(new Date(2020, 0, 12, 0, 0, 0), new Date(2020, 0, 13, 12));
+          setTimeout(function() {
+            f.setViewType("day");
+            f.hideMarker();
+            f.setRangeStartDate(new Date(2020, 0, 1));
+            f.loadAndDrawEvents([
+              {
+                id: 2010,
+                name: '2010_event',
+                resource_id: 3,
+                start: "2020-01-01 03:00:00",
+                end: "2020-01-01 16:00:00"
+              }
+            ]);
+          },1000);
         }, 2000)
       }, 1000);
       f.hideLoader();
-      }, 1200);
-    }, 3000);
+    }, 1200);
+  }, 3000);
 
 };
 
