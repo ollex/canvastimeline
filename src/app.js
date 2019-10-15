@@ -242,7 +242,7 @@ window.onload = function () {
           f.loadAndDrawEvents(evts);
           f.showMarkerAtDate(new Date(2020, 0, 12, 0, 0, 0), new Date(2020, 0, 13, 12));
           setTimeout(function() {
-            f.setViewType("day");
+            f.setViewType("day-2hours");
             f.hideMarker();
             f.setRangeStartDate(new Date(2020, 0, 1));
             f.loadAndDrawEvents([
@@ -252,13 +252,20 @@ window.onload = function () {
                 resource_id: 3,
                 start: "2020-01-01 03:00:00",
                 end: "2020-01-01 16:00:00"
+              },
+              {
+                id: 2011,
+                name: '2011_event',
+                resource_id: 3,
+                start: "2020-01-01 16:01:00",
+                end: "2020-01-01 18:00:00"
               }
             ]);
-          },1000);
+          },2000);
         }, 2000)
-      }, 1000);
+      }, 2000);
       f.hideLoader();
-    }, 1200);
+    }, 2000);
   }, 3000);
 
 };

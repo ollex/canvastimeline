@@ -319,6 +319,10 @@ class Canvastimeline {
         this._daysInRange = 1;
         this._granularity = 24;
         break;
+      case "day-2hours":
+        this._daysInRange = 1;
+        this._granularity = 12;
+        break;
       default:
         throw new Error("View Type is not set correctly!");
     }
@@ -361,6 +365,7 @@ class Canvastimeline {
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() - 7);
         break;
       case "day":
+      case "day-2hours":
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() - 1);
         break;
       default:
@@ -383,6 +388,7 @@ class Canvastimeline {
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() + 7);
         break;
       case "day":
+      case "day-2hours":
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() + 1);
         break;
       default:
@@ -410,6 +416,9 @@ class Canvastimeline {
     } else if(typeStr === 'day') {
       this._viewType = 'day';
       this._granularity = 24;
+    } else if(typeStr === 'day-2hours') {
+      this._viewType = 'day-2hours';
+      this._granularity = 12;
     } else {
       throw new Error("View Type invalid!");
     }
@@ -436,6 +445,7 @@ class Canvastimeline {
         this._curFirstOfRange = this.calcMonday(d);
         break;
       case "day":
+      case "day-2hours":
         d.setHours(0);
         d.setMinutes(0);
         d.setSeconds(0);
@@ -865,6 +875,11 @@ class Canvastimeline {
         const w = this._headerLayerCtx.measureText(nameStr);
         this._headerLayerCtx.fillText(nameStr, (this._colsInTbl / 2) + this._resColWidth - (w.width / 2), 2);
         break;
+      case "day":
+      case "day-2hours":
+        const dayStr = this._curFirstOfRange.toLocaleDateString();
+        const dw = this._headerLayerCtx.measureText(dayStr);
+        this._headerLayerCtx.fillText(dayStr, (this._colsInTbl / 2) + this._resColWidth - (dw.width / 2), 2);
       default:
     }
     this._resources.forEach((value, key, map) => {
@@ -915,7 +930,7 @@ class Canvastimeline {
       });
     }
     if(obj.hasOwnProperty("viewType")) {
-      if(["month","week","year","week-hours","week-12hours","day"].indexOf(obj.viewType) !== -1) {
+      if(["month","week","year","week-hours","week-12hours","day","day-2hours"].indexOf(obj.viewType) !== -1) {
         this.setViewType(obj.viewType);
         console.log(obj.viewType);
       } else {
