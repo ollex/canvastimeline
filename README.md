@@ -13,7 +13,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 + within the resources you can have a flexible amount of headers which have a name and a width
 + the resource header names should match the object attributes in the resources you load (see code just via an array of objects) thus each row is filled with the approprate data
 + the calendar of course adapts the number of days, day names etc. when switching between months or weeks
-+ currently year, month and week views with daily segmentation as well as week with hourly and half-day segments are available and switching between them (you have to load events again)
++ currently year, month and week views with daily segmentation as well as week and day with hourly and half-day segments are available and switching between them (you have to load events again)
 + it recalculates "everything" to match a chosen cell height and cell width.
 + the header row with the dates is also sticky
 + you can load any amount of events which will be visible when they are matching the currently chosen month
