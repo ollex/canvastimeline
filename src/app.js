@@ -242,7 +242,8 @@ window.onload = function () {
           f.loadAndDrawEvents(evts);
           f.showMarkerAtDate(new Date(2020, 0, 12, 0, 0, 0), new Date(2020, 0, 13, 12));
           setTimeout(function() {
-            f.setViewType("day-2hours");
+            f.setCellWidth(160);
+            f.setViewType("day-4hours");
             f.hideMarker();
             f.setRangeStartDate(new Date(2020, 0, 1));
             f.loadAndDrawEvents([

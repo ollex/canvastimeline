@@ -177,7 +177,7 @@ class Canvastimeline {
     this._maxCellHeight = this._cellHeight;
     this._onEventLayerClick = null;
     this._onContextMenu = null;
-    this._getEventText = function(ev) {
+    this._getEventText = function (ev) {
       return ev.name;
     };
 
@@ -208,11 +208,11 @@ class Canvastimeline {
     Object.keys(this).forEach((k) => {
       try {
         delete this[k];
-      } catch(err) {
+      } catch (err) {
         console.log(k);
       }
     });
-    if(removeParent) {
+    if (removeParent) {
       pV.parentNode.removeChild(pV);
     }
     pV = null;
@@ -293,7 +293,7 @@ class Canvastimeline {
       case "year":
         this._granularity = 1;
         const year = this._curFirstOfRange.getFullYear();
-        if(year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
+        if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
           this._daysInRange = 366;
         } else {
           this._daysInRange = 365;
@@ -323,6 +323,14 @@ class Canvastimeline {
         this._daysInRange = 1;
         this._granularity = 12;
         break;
+      case "day-4hours":
+        this._daysInRange = 1;
+        this._granularity = 6;
+        break;
+      case "day-6hours":
+        this._daysInRange = 1;
+        this._granularity = 4;
+        break;
       default:
         throw new Error("View Type is not set correctly!");
     }
@@ -335,7 +343,7 @@ class Canvastimeline {
   // for mondays only at the moment...
   calcMonday(d) {
     const currentWeekDay = d.getDay();
-    let wkStart = new Date(new Date(d).setDate(d.getDate() - (currentWeekDay == 0 ? 6 : currentWeekDay -1)));
+    let wkStart = new Date(new Date(d).setDate(d.getDate() - (currentWeekDay == 0 ? 6 : currentWeekDay - 1)));
     wkStart.setHours(0);
     wkStart.setMinutes(0);
     wkStart.setSeconds(0);
@@ -354,7 +362,7 @@ class Canvastimeline {
   prevRange() {
     switch (this._viewType) {
       case "month":
-        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() -1);
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() - 1);
         break;
       case "year":
         this._curFirstOfRange.setFullYear(this._curFirstOfRange.getFullYear() - 1);
@@ -366,6 +374,8 @@ class Canvastimeline {
         break;
       case "day":
       case "day-2hours":
+      case "day-4hours":
+      case "day-6hours":
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() - 1);
         break;
       default:
@@ -389,6 +399,8 @@ class Canvastimeline {
         break;
       case "day":
       case "day-2hours":
+      case "day-4hours":
+      case "day-6hours":
         this._curFirstOfRange.setDate(this._curFirstOfRange.getDate() + 1);
         break;
       default:
@@ -398,27 +410,33 @@ class Canvastimeline {
   }
 
   setViewType(typeStr) {
-    if(typeStr === 'week') {
+    if (typeStr === 'week') {
       this._viewType = 'week';
       this._granularity = 1;
-    } else if(typeStr === 'month') {
+    } else if (typeStr === 'month') {
       this._viewType = 'month';
       this._granularity = 1;
-    } else if(typeStr === 'year') {
+    } else if (typeStr === 'year') {
       this._viewType = 'year';
       this._granularity = 1;
-    } else if(typeStr === 'week-hours') {
+    } else if (typeStr === 'week-hours') {
       this._viewType = 'week-hours';
       this._granularity = 24;
-    } else if(typeStr === 'week-12hours') {
+    } else if (typeStr === 'week-12hours') {
       this._viewType = 'week-12hours';
       this._granularity = 2;
-    } else if(typeStr === 'day') {
+    } else if (typeStr === 'day') {
       this._viewType = 'day';
       this._granularity = 24;
-    } else if(typeStr === 'day-2hours') {
+    } else if (typeStr === 'day-2hours') {
       this._viewType = 'day-2hours';
       this._granularity = 12;
+    } else if (typeStr === 'day-4hours') {
+      this._viewType = 'day-4hours';
+      this._granularity = 6;
+    } else if (typeStr === 'day-6hours') {
+      this._viewType = 'day-6hours';
+      this._granularity = 4;
     } else {
       throw new Error("View Type invalid!");
     }
@@ -446,6 +464,8 @@ class Canvastimeline {
         break;
       case "day":
       case "day-2hours":
+      case "day-4hours":
+      case "day-6hours":
         d.setHours(0);
         d.setMinutes(0);
         d.setSeconds(0);
@@ -565,24 +585,24 @@ class Canvastimeline {
   }
 
   removeEvent(ev) {
-     const { id, resource_id } = ev;
-     if(id && resource_id) {
-       const ref = this._resources.get(resource_id);
-      if(!ref) {
+    const {id, resource_id} = ev;
+    if (id && resource_id) {
+      const ref = this._resources.get(resource_id);
+      if (!ref) {
         throw new Error("Resource not found");
       }
-       let idx = ref.events.findIndex(function(item) {
-         return item.id == id;
-       });
-       if(idx !== -1) {
-         const removed = ref.events.splice(idx, 1)[0];
-         this._adjustResourceRow(ref);
-       } else {
-         throw new Error("Event not found");
-       }
-     } else {
-       throw new Error("Missing identifier id and/or resource_id");
-     }
+      let idx = ref.events.findIndex(function (item) {
+        return item.id == id;
+      });
+      if (idx !== -1) {
+        const removed = ref.events.splice(idx, 1)[0];
+        this._adjustResourceRow(ref);
+      } else {
+        throw new Error("Event not found");
+      }
+    } else {
+      throw new Error("Missing identifier id and/or resource_id");
+    }
   }
 
   _adjustResourceRow(ref) {
@@ -661,7 +681,7 @@ class Canvastimeline {
     ev.miny = ref.yPos + 1;
     if (ref.events.length) {
       ref.events.push(ev);
-     this._adjustResourceRow(ref);
+      this._adjustResourceRow(ref);
     } else {
       ref.events.push(ev);
       ref.max_event_width = ev.width;
@@ -671,14 +691,14 @@ class Canvastimeline {
   }
 
   clickHandler(ev) {
-    if(this._onEventLayerClick) {
+    if (this._onEventLayerClick) {
       this.findEventByXY(ev, this._onEventLayerClick);
     }
   }
 
   contextMenu(ev) {
     ev.preventDefault();
-    if(this._onContextMenu) {
+    if (this._onContextMenu) {
       this.findEventByXY(ev, this._onContextMenu);
     }
   }
@@ -715,7 +735,7 @@ class Canvastimeline {
   }
 
   drawEvents(ref) {
-    if(ref) {
+    if (ref) {
       this._eventLayerCtx.clearRect(0, ref.yPos + 1, this._colsInTbl, ref.height);
       ref.events.forEach((ev) => {
         this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
@@ -755,8 +775,8 @@ class Canvastimeline {
       if (array.length == 0) return false;
       // this should be faster than sorting?
       let max = "0000-00-00 00:00:00";
-      array.forEach(function(item) {
-        if(item.end > max) max = item.end;
+      array.forEach(function (item) {
+        if (item.end > max) max = item.end;
       });
       return max;
     };
@@ -840,23 +860,23 @@ class Canvastimeline {
       this._headerLayerCtx.fillStyle = (i % 2 === 0) ? "#f9f9f9" : "#fdfdfd";
       this._headerLayerCtx.fillRect(i * this._granularity * this._cellWidth + this._resColWidth, 0, this._granularity * this._cellWidth, this._resHeaderLayer.height);
       this._headerLayerCtx.fillStyle = "#333";
-      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), (i * this._granularity  * this._cellWidth) + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 14);
-      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._granularity  * this._cellWidth + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 25);
-      for(let k = 0; k < this._granularity; k++) {
+      this._headerLayerCtx.fillText(weekDate.getDate().toString(10), (i * this._granularity * this._cellWidth) + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 14);
+      this._headerLayerCtx.fillText(this._days[weekDate.getDay()], i * this._granularity * this._cellWidth + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._dayWidths[weekDate.getDay()] / 2, 25);
+      for (let k = 0; k < this._granularity; k++) {
         this._backgroundCtx.moveTo(curX + (k * this._cellWidth), 0);
         this._backgroundCtx.lineTo(curX + (k * this._cellWidth), this._bgHeight);
         // if we want hours (granularity > 1)
-        if(this._granularity > 1) {
+        if (this._granularity > 1) {
           this._headerLayerCtx.fillText((24 / this._granularity * k).toString(10), curX + (k * this._cellWidth) + this._resColWidth - this._resHeaderLayerCtx.measureText((24 / this._granularity * k).toString(10)).width / 2, 35);
         }
       }
 
     }
     let z;
-    switch(this._viewType) {
+    switch (this._viewType) {
       case "year":
         let curDaysInMonth, sumOfDays = 0;
-        for(let i = 0; i < 12; i++) {
+        for (let i = 0; i < 12; i++) {
           curDaysInMonth = new Date(this._curFirstOfRange.getFullYear(), i + 1, 0).getDate();
           sumOfDays += curDaysInMonth;
           this._headerLayerCtx.fillText(this._months[i], sumOfDays * this._cellWidth - (curDaysInMonth / 2 * this._cellWidth) + this._resColWidth - this._monthWidths[i] / 2, 2);
@@ -877,6 +897,8 @@ class Canvastimeline {
         break;
       case "day":
       case "day-2hours":
+      case "day-4hours":
+      case "day-6hours":
         const dayStr = this._curFirstOfRange.toLocaleDateString();
         const dw = this._headerLayerCtx.measureText(dayStr);
         this._headerLayerCtx.fillText(dayStr, (this._colsInTbl / 2) + this._resColWidth - (dw.width / 2), 2);
@@ -904,7 +926,7 @@ class Canvastimeline {
       }
     }
     if (obj.hasOwnProperty("onContextMenu")) {
-      if(typeof obj.onContextMenu === "function") {
+      if (typeof obj.onContextMenu === "function") {
         this._onContextMenu = obj.onContextMenu;
       }
     }
@@ -917,20 +939,20 @@ class Canvastimeline {
       this._scheduler.style.height = "100vH";
       document.body.style.margin = "0";
     }
-    if(obj.hasOwnProperty("dayNames")) {
+    if (obj.hasOwnProperty("dayNames")) {
       this._days = obj.dayNames;
       this._days.forEach((d, idx) => {
         this._dayWidths[idx] = this._backgroundCtx.measureText(d).width;
       });
     }
-    if(obj.hasOwnProperty("monthNames")) {
+    if (obj.hasOwnProperty("monthNames")) {
       this._months = obj.monthNames;
       this._months.forEach((m, idx) => {
         this._monthWidths[idx] = this._backgroundCtx.measureText(m).width;
       });
     }
-    if(obj.hasOwnProperty("viewType")) {
-      if(["month","week","year","week-hours","week-12hours","day","day-2hours"].indexOf(obj.viewType) !== -1) {
+    if (obj.hasOwnProperty("viewType")) {
+      if (["month", "week", "year", "week-hours", "week-12hours", "day", "day-2hours", "day-4hours", "day-6hours"].indexOf(obj.viewType) !== -1) {
         this.setViewType(obj.viewType);
         console.log(obj.viewType);
       } else {
