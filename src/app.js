@@ -262,6 +262,8 @@ window.onload = function () {
                 end: "2020-01-01 18:00:00"
               }
             ]);
+            f.addResource({id: 21, name: "c34a", beds: 3});
+            f.removeResource(20);
           },2000);
         }, 2000)
       }, 2000);

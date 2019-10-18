@@ -25,6 +25,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 + a configurable click handler (deliver your callback with initial config object) is attached to the event layer canvas and finds the event clicked (or no event when the click was not where an event is)
 + configure "internationalize" day names and month names
 + overwrite method to get text from your events with init config object
++ add and delete resources (this happens without deleting the currently loaded events)
 
 ![alt text](./src/images/canvastimeline.gif)
 

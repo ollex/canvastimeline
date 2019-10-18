@@ -168,7 +168,6 @@ class Canvastimeline {
     this._scheduler.appendChild(this._marker);
     this._schedulerWrapper.appendChild(this._scheduler);
     this._view.appendChild(this._schedulerWrapper);
-    this._resources = [];
     this.sidecols = [];
     this._resources = new Map();
     this._resourcesIdx = new Map();
@@ -196,7 +195,6 @@ class Canvastimeline {
     this._eventLayer.oncontextmenu = this.contextMenu.bind(this);
   }
 
-
   destroy(removeParent) {
     this._eventLayer.removeEventListener("click", this.findEventByXY);
     this._eventLayer.removeEventListener("contextmenu", this.contextMenu);
@@ -216,6 +214,55 @@ class Canvastimeline {
       pV.parentNode.removeChild(pV);
     }
     pV = null;
+  }
+
+  addResource(resource) {
+    const lastKey = Array.from(this._resourcesIdx.values()).pop();
+    let ref = this._resources.get(lastKey);
+    // we always add a resource for the moment at the end so the idx is always +1
+    resource.idx = ref.idx + 1;
+    resource.yPos = ref.yPos + ref.height;
+    if(!resource.hasOwnProperty("events")) {
+      resource.events = [];
+    }
+    this._helpArray.forEach(function (header) {
+      if (!resource.hasOwnProperty(header.name)) {
+        resource[header.name] = "";
+      }
+    });
+    resource.height = 0;
+    this._resourcesIdx.set(resource.idx, resource.id);
+    this._resources.set(resource.id, resource);
+    this._adjustResourceRow(this._resources.get(resource.id));
+  }
+
+  removeResource(resource_id) {
+    let ref = this._resources.get(resource_id);
+    const height = ref.height;
+    let curRef;
+    for(let i = ref.idx + 1; i < this._resourcesIdx.size; i++) {
+      curRef = this._resources.get(this._resourcesIdx.get(i));
+      curRef.yPos -= height;
+      curRef.events.forEach((ev) => {
+        ev.miny -= height;
+      });
+    }
+    if (this._resources.delete(resource_id)) {
+      this._resourcesIdx.clear();
+      let ix = 0;
+      this._resources.forEach((r, key) => {
+        r.idx = ix;
+        this._resourcesIdx.set(ix, r.id);
+        ix ++;
+      });
+      this._bgHeight -= height;
+      this.setSizesAndPositionsBeforeRedraw();
+      this.drawDayLines();
+      this.drawResources();
+      this.drawEvents();
+    } else {
+      throw new Error("Could not delete resource!");
+    }
   }
 
   prepareResources(resources) {
@@ -610,7 +657,12 @@ class Canvastimeline {
     ref.events.forEach(function (ev) {
       ev.miny = ref.yPos + 1;
     });
-    let possibleMultiArray = this.separate(ref.events);
+    let possibleMultiArray;
+    if(ref.events.length) {
+      possibleMultiArray = this.separate(ref.events);
+    } else {
+      possibleMultiArray = [];
+    }
     ref.events = [];
     let maxHeightF = 0;
     let maxWidthOfEvent = 0;
@@ -628,7 +680,6 @@ class Canvastimeline {
         }
         return false;
       };
-
       for (let e of ar) {
         let curLevel = 0;
         if (maxWidthOfEvent < e.width) {
@@ -671,7 +722,6 @@ class Canvastimeline {
   }
 
   addEvent(ev) {
-    const st = performance.now();
     const ref = this._resources.get(ev.resource_id);
     let prevHeight = ref.height;
     let startDate = this.parseDate(ev.start);
@@ -764,6 +814,7 @@ class Canvastimeline {
   }
 
   separate(array) {
+
     array.sort((a, b) => {
       if (a.start < b.start)
         return -1;
@@ -772,7 +823,7 @@ class Canvastimeline {
       return 0;
     });
     const getMax = (array) => {
-      if (array.length == 0) return false;
+      if (array.length === 0) return false;
       // this should be faster than sorting?
       let max = "0000-00-00 00:00:00";
       array.forEach(function (item) {
