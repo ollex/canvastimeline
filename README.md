@@ -26,6 +26,7 @@ One thing I will probably not add directly to the calendar class is buttons and 
 + configure "internationalize" day names and month names
 + overwrite method to get text from your events with init config object
 + add and delete resources (this happens without deleting the currently loaded events)
++ swap resources for others
 
 ![alt text](./src/images/canvastimeline.gif)
 

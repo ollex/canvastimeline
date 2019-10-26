@@ -287,9 +287,12 @@ class Canvastimeline {
       });
       this._sidecols.set(idx, newX);
     });
+    let curY = 0 - this._cellHeight;
     resources.forEach((r, idx) => {
       r.events = [];
       r.idx = idx;
+      curY += this._cellHeight;
+      r.yPos = curY;
       // in case a resource is missing an attribute we add an empty string here
       this._helpArray.forEach(function (header) {
         if (!r.hasOwnProperty(header.name)) {
@@ -299,6 +302,20 @@ class Canvastimeline {
       this._resources.set(r.id, r);
       this._resourcesIdx.set(idx, r.id);
     });
+  }
+
+  swapResources(obj) {
+    if (!obj.hasOwnProperty("resources")) {
+      obj.resources = [];
+    }
+    if (obj.hasOwnProperty("sidecols")) {
+      this.sidecols = obj.sidecols;
+    }
+    this.prepareResources(obj.resources);
+    this._bgHeight = this._resources.size * this._cellHeight;
+    this.setSizesAndPositionsBeforeRedraw();
+    this.drawDayLines();
+    this.drawResources();
   }
 
   showMarkerAtDate(startDate, endDate) {
