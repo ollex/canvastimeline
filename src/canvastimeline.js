@@ -1,6 +1,6 @@
 "use strict";
 
-class Canvastimeline {
+export default class Canvastimeline {
   constructor(parentEl) {
     this._view = parentEl;
     if (!document.getElementById("canvastimeline-css-stylesheet")) {
@@ -21,19 +21,20 @@ class Canvastimeline {
       style.insertRule(`.canvastl_scheduler_wrapper {
 			position: relative;
 			width: 100%;
+			max-width: calc(100vw - 32px);
 			height: 100%;
 			box-sizing: border-box;
 		}`);
 
       style.insertRule(`.canvastl_scheduler {
 			width: 100%;
-			max-width: 1890px;
-			height: 600px;
 			overflow: auto;
+			max-height: calc(100vh - 182px);
 			border: 1px solid #eee;
 			box-sizing: border-box;
+			height: 100%;
 			position: relative;
-			//max-height: calc(100vH - 34px);
+			transition: width 0.5s ease-out, height 0.5s ease-out;
 		}`);
 
       style.insertRule(`.canvastl_level_0, .canvastl_level_1 {
@@ -48,7 +49,7 @@ class Canvastimeline {
 			left: 0;
 			margin: 0;
 			padding: 0;
-			margin-top: -4px;
+			margin-top: -6px;
 			background: #ffffff;
 			opacity: 1;
 			z-index: 4;
@@ -132,9 +133,8 @@ class Canvastimeline {
     this._loader.className = "canvastimeline-loader";
     this._scheduler = document.createElement("div");
     this._scheduler.className = 'canvastl_scheduler';
-    this._scheduler.height = this._view.height;
     this._scheduler.width = this._view.width;
-    this._scheduler.style.height = this._view.style.height;
+    this._scheduler.height = 200;
     this._background = document.createElement("canvas");
     this._background.className = "canvastl_level_0";
     this._background.width = 1860;
@@ -177,11 +177,12 @@ class Canvastimeline {
     this._maxCellHeight = this._cellHeight;
     this._onEventLayerClick = null;
     this._onContextMenu = null;
+    this._lastHovered = null;
     this._getEventText = function (ev) {
       return ev.name;
     };
 
-    this._backgroundCtx.font = "12px Arial";
+    this._backgroundCtx.font = "12px 'Segoe UI'";
     for (let i = 1; i < 32; i++) {
       this._numWidths[i - 1] = this._backgroundCtx.measureText('' + i).width;
     }
@@ -194,6 +195,7 @@ class Canvastimeline {
 
     this._eventLayer.onclick = this.clickHandler.bind(this);
     this._eventLayer.oncontextmenu = this.contextMenu.bind(this);
+    this._eventLayer.onmousemove = this.throttle(this.moveHandler.bind(this), 50);
   }
 
   destroy(removeParent) {
@@ -215,6 +217,7 @@ class Canvastimeline {
       pV.parentNode.removeChild(pV);
     }
     pV = null;
+    window.removeEventListener('resize', this.adjustHeight);
   }
 
   addResource(resource) {
@@ -357,16 +360,36 @@ class Canvastimeline {
     switch (this._viewType) {
       case "year":
         this._granularity = 1;
-        const year = this._curFirstOfRange.getFullYear();
-        if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
-          this._daysInRange = 366;
-        } else {
-          this._daysInRange = 365;
-        }
+        this._daysInRange = new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 1, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 2, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 3, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 4, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 5, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 6, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 7, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 8, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 9, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 10, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 11, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 12, 0).getDate();
         break;
       case "month":
         this._granularity = 1;
         this._daysInRange = new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 1, 0).getDate();
+        break;
+      case "2month":
+        this._granularity = 1;
+        this._daysInRange = new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 1, 0).getDate()
+        + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 2, 0).getDate();
+        break;
+      case "6month":
+        this._granularity = 1;
+        this._daysInRange = new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 1, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 2, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 3, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 4, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 5, 0).getDate()
+          + new Date(this._curFirstOfRange.getFullYear(), this._curFirstOfRange.getMonth() + 6, 0).getDate();
         break;
       case "week":
         this._daysInRange = 7;
@@ -412,7 +435,7 @@ class Canvastimeline {
   // for mondays only at the moment...
   calcMonday(d) {
     const currentWeekDay = d.getDay();
-    let wkStart = new Date(new Date(d).setDate(d.getDate() - (currentWeekDay == 0 ? 6 : currentWeekDay - 1)));
+    let wkStart = new Date(new Date(d).setDate(d.getDate() - (currentWeekDay === 0 ? 6 : currentWeekDay - 1)));
     wkStart.setHours(0);
     wkStart.setMinutes(0);
     wkStart.setSeconds(0);
@@ -432,6 +455,12 @@ class Canvastimeline {
     switch (this._viewType) {
       case "month":
         this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() - 1);
+        break;
+      case "2month":
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() - 2);
+        break;
+      case "6month":
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() - 6);
         break;
       case "year":
         this._curFirstOfRange.setFullYear(this._curFirstOfRange.getFullYear() - 1);
@@ -462,6 +491,12 @@ class Canvastimeline {
       case "month":
         this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() + 1);
         break;
+      case "2month":
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() + 2);
+        break;
+      case "6month":
+        this._curFirstOfRange.setMonth(this._curFirstOfRange.getMonth() + 6);
+        break;
       case "week":
       case "week-hours":
       case "week-2hours":
@@ -480,12 +515,23 @@ class Canvastimeline {
     this.prepareRange();
   }
 
+  updateViewType(typeStr) {
+    this.setViewType(typeStr);
+    this.setRangeStartDate(this._curFirstOfRange);
+  }
+
   setViewType(typeStr) {
     if (typeStr === 'week') {
       this._viewType = 'week';
       this._granularity = 1;
     } else if (typeStr === 'month') {
       this._viewType = 'month';
+      this._granularity = 1;
+    } else if (typeStr === '2month') {
+      this._viewType = '2month';
+      this._granularity = 1;
+    } else if (typeStr === '6month') {
+      this._viewType = '6month';
       this._granularity = 1;
     } else if (typeStr === 'year') {
       this._viewType = 'year';
@@ -519,6 +565,8 @@ class Canvastimeline {
   setRangeStartDate(d) {
     switch (this._viewType) {
       case "month":
+      case "2month":
+      case "6month":
         this._curFirstOfRange = new Date();
         this._curFirstOfRange.setFullYear(d.getFullYear());
         this._curFirstOfRange.setMonth(d.getMonth());
@@ -576,11 +624,6 @@ class Canvastimeline {
     let failureArray = [];
     try {
       for (let ev of arrayOfEventObjects) {
-        /*
-         * think about storing the Date on the event not only the initial strings
-         * for performance reasons as comparing the Date (a number) with the visible range
-         * could be faster like that?
-        * */
         let startDate = this.parseDate(ev.start);
         let endDate = this.parseDate(ev.end);
         ev.minx = this.getXPos(startDate.getTime());
@@ -768,6 +811,32 @@ class Canvastimeline {
     }
   }
 
+  moveHandler(ev) {
+    this.findEventByXY(ev, (evt)=>{
+      if(evt) {
+        this._eventLayer.style.cursor = "pointer";
+        if(this._lastHovered !== evt.id) {
+          document.dispatchEvent(new CustomEvent('os_hovered', {detail: evt}));
+        }
+        this._lastHovered = evt.id;
+      } else {
+        this._eventLayer.style.cursor = "default";
+        if(this._lastHovered != null) {
+          this._lastHovered = null;
+          document.dispatchEvent(new CustomEvent('os_unhovered'));
+        }
+      }
+    }, true);
+  }
+
+  throttle(callback, wait) {
+    let timeout
+    return function(e) {
+      if (timeout) return;
+      timeout = setTimeout(() => (callback(e), timeout=undefined), wait);
+    }
+  }
+
   clickHandler(ev) {
     if (this._onEventLayerClick) {
       this.findEventByXY(ev, this._onEventLayerClick);
@@ -781,7 +850,7 @@ class Canvastimeline {
     }
   }
 
-  findEventByXY(ev, cb) {
+  findEventByXY(ev, cb, mustCall) {
     const rect = ev.target.getBoundingClientRect();
     const x = ev.clientX - rect.left; //x position within the element.
     const y = ev.clientY - rect.top;
@@ -803,6 +872,9 @@ class Canvastimeline {
             return cb(ev, ref.id);
           }
         }
+        if(mustCall) {
+          return cb(null);
+        }
         return;
       } else if (ref.yPos < y) {
         start = mid + 1;
@@ -816,7 +888,7 @@ class Canvastimeline {
     if (ref) {
       this._eventLayerCtx.clearRect(0, ref.yPos + 1, this._colsInTbl, ref.height);
       ref.events.forEach((ev) => {
-        this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
+        this._eventLayerCtx.fillStyle = ev.background || "#1174c0";
         this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
         this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
         let txt = this._getEventText(ev).split('\n');
@@ -827,7 +899,7 @@ class Canvastimeline {
     } else {
       this._resources.forEach((r) => {
         r.events.forEach((ev) => {
-          this._eventLayerCtx.fillStyle = ev.background || "#1CA1C1";
+          this._eventLayerCtx.fillStyle = ev.background || "#1174c0";
           this._eventLayerCtx.fillRect(ev.minx, ev.miny, ev.width, this._cellHeight - 1);
           this._eventLayerCtx.fillStyle = ev.color || "#ffffff";
           let txt = this._getEventText(ev).split('\n');
@@ -842,7 +914,6 @@ class Canvastimeline {
   }
 
   separate(array) {
-
     array.sort((a, b) => {
       if (a.start < b.start)
         return -1;
@@ -877,17 +948,24 @@ class Canvastimeline {
     return retval;
   }
 
+  adjustHeight() {
+    this._scheduler.style.height = (this._bgHeight < this._schedulerWrapper.clientHeight)
+      ? (this._bgHeight + 74 + 'px')
+      : (this._schedulerWrapper.clientHeight ? this._schedulerWrapper.clientHeight + 'px' : '100%');
+  }
+
   setSizesAndPositionsBeforeRedraw() {
     this._resLayer.width = this._resHeaderLayer.width = this._resColWidth;
     this._resLayer.height = this._eventLayer.height = this._background.height = this._bgHeight;
     this._eventLayer.width = this._background.width = this._colsInTbl;
     this._headerLayer.width = this._colsInTbl + this._resColWidth;
     this._eventLayer.style.left = this._background.style.left = this._resColWidth + 'px';
-    this._backgroundCtx.font = "12px Arial";
-    this._eventLayerCtx.font = "12px Arial";
-    this._resLayerCtx.font = "12px Arial";
-    this._headerLayerCtx.font = "12px Arial";
-    this._resHeaderLayerCtx.font = "12px Arial";
+    this.adjustHeight();
+    this._backgroundCtx.font = "12px 'Segoe UI'";
+    this._eventLayerCtx.font = "12px 'Segoe UI'";
+    this._resLayerCtx.font = "12px 'Segoe UI'";
+    this._headerLayerCtx.font = "12px 'Segoe UI'";
+    this._resHeaderLayerCtx.font = "12px 'Segoe UI'";
   }
 
   drawResources() {
@@ -899,7 +977,7 @@ class Canvastimeline {
     this._resLayerCtx.fillStyle = "#333";
     this._resLayerCtx.textBaseline = "top";
     this._resLayerCtx.lineWidth = 1;
-    this._resLayerCtx.strokeStyle = '#eee';
+    this._resLayerCtx.strokeStyle = '#dee2e6';
     this._resLayerCtx.translate(0.5, 0.5);
     this._resLayerCtx.beginPath();
     this._helpArray.forEach((obj, idx) => {
@@ -928,7 +1006,7 @@ class Canvastimeline {
     weekDate.setDate(weekDate.getDate() - 1);
     this._backgroundCtx.lineWidth = 1;
     this._backgroundCtx.translate(0.5, 0.5);
-    this._backgroundCtx.strokeStyle = "#eee";
+    this._backgroundCtx.strokeStyle = "#dee2e6";
     this._headerLayerCtx.textBaseline = "top";
     this._headerLayerCtx.fillStyle = '#333';
     this._backgroundCtx.beginPath();
@@ -936,7 +1014,7 @@ class Canvastimeline {
     for (let i = 0; i < this._daysInRange; i++) {
       weekDate.setDate(weekDate.getDate() + 1);
       curX = i * this._granularity * this._cellWidth;
-      this._headerLayerCtx.fillStyle = (i % 2 === 0) ? "#f5f5f5" : "#fdfdfd";
+      this._headerLayerCtx.fillStyle = (i % 2 === 0) ? "#f2f4f8" : "#fdfdfd";
       this._headerLayerCtx.fillRect(i * this._granularity * this._cellWidth + this._resColWidth, 0, this._granularity * this._cellWidth, this._resHeaderLayer.height);
       this._headerLayerCtx.fillStyle = "#333";
       this._headerLayerCtx.fillText(weekDate.getDate().toString(10), (i * this._granularity * this._cellWidth) + (this._cellWidth * this._granularity / 2) + this._resColWidth - this._numWidths[weekDate.getDate() - 1] / 2, 14);
@@ -964,6 +1042,26 @@ class Canvastimeline {
       case "month":
         z = this._curFirstOfRange.getMonth();
         this._headerLayerCtx.fillText(this._months[z], this._colsInTbl / 2 + this._resColWidth - this._monthWidths[z] / 2, 2);
+        break;
+      case "2month":
+        let curDaysInMonth2, sumOfDays2 = 0, i = this._curFirstOfRange.getMonth(), l = i + 2;
+        for (; i < l; i++) {
+          curDaysInMonth2 = new Date(this._curFirstOfRange.getFullYear(), i + 1, 0).getDate();
+          let nD = new Date(this._curFirstOfRange.getFullYear(), i, 1);
+          let m = nD.getMonth();
+          sumOfDays2 += curDaysInMonth2;
+          this._headerLayerCtx.fillText(this._months[m], sumOfDays2 * this._cellWidth - (curDaysInMonth2 / 2 * this._cellWidth) + this._resColWidth - this._monthWidths[m] / 2, 2);
+        }
+        break;
+      case "6month":
+        let curDaysInMonth6, sumOfDays6 = 0, i6 = this._curFirstOfRange.getMonth(), l6 = i6 + 6;
+        for (; i6 < l6; i6++) {
+          curDaysInMonth6 = new Date(this._curFirstOfRange.getFullYear(), i6 + 1, 0).getDate();
+          let nD6 = new Date(this._curFirstOfRange.getFullYear(), i6, 1);
+          let m6 = nD6.getMonth();
+          sumOfDays6 += curDaysInMonth6;
+          this._headerLayerCtx.fillText(this._months[m6], sumOfDays6 * this._cellWidth - (curDaysInMonth6 / 2 * this._cellWidth) + this._resColWidth - this._monthWidths[m6] / 2, 2);
+        }
         break;
       case "week":
       case "week-hours":
@@ -1032,9 +1130,8 @@ class Canvastimeline {
       });
     }
     if (obj.hasOwnProperty("viewType")) {
-      if (["month", "week", "year", "week-hours", "week-2hours", "week-12hours", "day", "day-2hours", "day-4hours", "day-6hours"].indexOf(obj.viewType) !== -1) {
+      if (["month", "2month", "6month", "week", "year", "week-hours", "week-2hours", "week-12hours", "day", "day-2hours", "day-4hours", "day-6hours"].indexOf(obj.viewType) !== -1) {
         this.setViewType(obj.viewType);
-        console.log(obj.viewType);
       } else {
         throw new Error("View Type unknown!");
       }
@@ -1049,7 +1146,7 @@ class Canvastimeline {
     this.setSizesAndPositionsBeforeRedraw();
     this.drawDayLines();
     this.drawResources();
+    //setTimeout(()=>window.addEventListener('resize', this.adjustHeight),50);
   }
 
 }
-
